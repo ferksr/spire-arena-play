@@ -683,7 +683,7 @@ button{font-family:inherit;color:inherit}
 .g2{min-height:100dvh;max-width:520px;margin:0 auto;padding:6px 10px calc(8px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px}
 .g2-logo{display:flex;align-items:center;justify-content:center;gap:6px;height:20px;font-family:var(--display);font-weight:600;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-3)}
 .g2-logo .ic{font-size:14px;color:#3F73D1}
-.g2-bar{position:relative;display:grid;grid-template-columns:30px minmax(0,1fr) auto 34px 34px;align-items:center;gap:6px;min-height:46px;padding:5px 8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh-1)}
+.g2-bar{position:relative;display:grid;grid-template-columns:30px minmax(0,1fr) auto 34px 34px;align-items:center;gap:6px;min-height:46px;padding:5px 8px 5px 13px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh-1)}
 .g2-bar .g2-name{font-family:var(--display);font-weight:700;font-size:12px;letter-spacing:.04em}
 .g2-bar .g2-stats{display:flex;align-items:center;gap:7px;font-size:12.5px;white-space:nowrap}
 .g2-bar .g2-slot{width:34px;height:34px;display:grid;place-items:center}
@@ -700,7 +700,7 @@ button{font-family:inherit;color:inherit}
 .g2-status>div{min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .g2-bar>*{order:0!important}.g2-bar .g2-status{margin:0!important;width:auto}
 .g2-board{flex:1 1 auto;display:flex;align-items:center;justify-content:center;min-height:0}
-.g2 .board{--ch:clamp(36px,calc((100dvh - 262px - 52px) / 7),92px);--cw:min(calc((100vw - 52px) / 3),calc(var(--ch) * 1.6))}
+.g2 .board{--ch:clamp(36px,calc((100dvh - 262px - 52px) / 7),92px);--cw:min(calc((100vw - 58px) / 3),calc(var(--ch) * 1.6))}
 .g2 .hand-box{margin:0}.g2 .hand-title{display:none}
 .g2 .hand-grid{display:flex;gap:6px}.g2 .hand-grid .hcard{flex:1 1 0;min-width:0}
 .g2 .menu{position:absolute;right:0;top:auto;bottom:calc(100% + 6px)}
@@ -738,6 +738,78 @@ button{font-family:inherit;color:inherit}
 .fx-aim{position:absolute;left:0;top:0;pointer-events:none;z-index:29;overflow:visible;animation:fade .15s ease-out}
 .fx-aim line{stroke:var(--crimson);stroke-width:3;stroke-dasharray:2 7;stroke-linecap:round;opacity:.8}
 .fx-aim circle{fill:none;stroke:var(--crimson);stroke-width:2.5}
+
+/* v16: inicio sin scroll en todos los tamaños; dificultad al centro; Auto y Jugar a la derecha; skills repartidas */
+.sel-titlerow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px}
+.sel-titlerow h1{flex:none;justify-self:start}
+.sel-tools{display:flex;gap:8px;justify-self:end}
+.m-full .sk-l{display:none}
+.m-full .cd-sk{width:100%;flex-wrap:nowrap;justify-content:space-evenly;gap:0}
+.dock-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+@media(max-width:380px){.sel-titlerow h1{font-size:13px}.seg button{padding:4px 6px;font-size:10.5px}}
+@media(min-width:701px){
+  html:has(#sel1-screen.active),body:has(#sel1-screen.active){overflow:hidden;overscroll-behavior:none}
+  body:has(#sel1-screen.active){min-height:0}
+  #sel1-screen.active{display:flex!important;flex-direction:column;position:fixed;inset:0;overflow:hidden}
+  .sel-top{padding-top:clamp(10px,2vh,22px);width:100%;flex-shrink:0}
+  .sel-wrap{flex:1;min-height:0;width:100%;display:flex;flex-direction:column;padding:clamp(8px,2vh,28px) 24px 0}
+  .sel-intro{flex-shrink:0;margin-bottom:clamp(8px,1.6vh,18px)}
+  .cards-grid{flex:1;min-height:0;grid-template-rows:repeat(4,minmax(0,1fr));gap:clamp(8px,1.6vh,16px);padding:3px 3px 8px}
+  .co{container-type:size;min-height:0}
+  .m-full{height:100%;min-height:0;box-sizing:border-box;justify-content:center;padding:clamp(6px,6cqh,18px) 10px;gap:clamp(3px,4cqh,9px)}
+  .m-full .cd-name{font-size:clamp(11px,7cqh,15px)}
+  .m-full .cd-art{width:clamp(24px,30cqh,66px);height:clamp(24px,30cqh,66px);font-size:clamp(13px,16cqh,36px)}
+  .m-full .cd-beats .ic{font-size:clamp(10px,6.5cqh,14px)}
+  .m-full .cd-sk .ic{font-size:clamp(12px,8cqh,20px)}
+  .dock{position:static;flex-shrink:0}
+  .dock-in{display:block;max-width:1080px;padding:clamp(8px,1.6vh,14px) 24px}
+}
+@media(min-width:701px) and (max-width:1100px){.cards-grid{grid-template-rows:repeat(5,minmax(0,1fr))}}
+@media(min-width:701px) and (max-height:680px){.m-full .cd-mid{display:flex!important;flex-direction:row!important;flex-wrap:nowrap;align-items:center;justify-content:center;gap:8px}.m-full .cd-art{flex:none}.m-full .cd-art{width:24px;height:24px;font-size:13px}}
+
+
+/* v19: todas las cartas del mismo tamaño: columnas parejas aunque el contenido sea distinto */
+.cards-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media(max-width:1100px){.cards-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:700px){.hand-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.cards-grid>.co,.hand-grid>.hcard{min-width:0}
+.m-full,.m-hand,.m-cell{min-width:0;overflow:hidden}
+@media(max-width:350px){.m-full .sk-chip{padding:1px 0}.m-full .cd-sk .ic{font-size:10px}}
+/* v17: celulares en horizontal (alto <= 500): selección en 7 columnas y juego con el tablero a la izquierda */
+@media(orientation:landscape) and (max-height:500px){
+  .sel-top{padding:4px 12px 0;flex-shrink:0}.brand-mark{width:22px;height:22px;border-radius:7px}.brand-mark .ic{font-size:13px}.brand-name{font-size:11px}
+  .sel-wrap{padding:4px 14px 0}.sel-intro{margin-bottom:6px}.sel-titlerow h1{font-size:18px}
+  #grid1.cards-grid{grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));grid-auto-rows:auto;gap:5px;padding:2px;align-content:stretch}
+  #grid1 .co{container-type:size}
+  #grid1 .m-full{height:100%;min-height:0;box-sizing:border-box;padding:3px 3px;gap:2px;justify-content:center;overflow:hidden}
+  #grid1 .m-full .cd-name{font-size:10px;line-height:1.1}
+  #grid1 .m-full .cd-mid{display:flex!important;flex-direction:row!important;align-items:center;justify-content:center;gap:5px}
+  #grid1 .m-full .cd-art{width:22px;height:22px;font-size:12px;flex:none}
+  #grid1 .m-full .cd-beats{display:flex}#grid1 .m-full .cd-beats .arr{display:block}#grid1 .m-full .cd-beats .ic{font-size:10px}
+  #grid1 .m-full .cd-sk .ic{font-size:12px}
+  #grid1 .sk-chip{padding:1px 2px;border:0;background:none}
+  .dock-in{padding:5px 14px 6px}
+  .g2{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto 1fr auto auto;column-gap:10px;row-gap:6px;height:100dvh;min-height:0;max-width:none;padding:6px 12px calc(6px + env(safe-area-inset-bottom))}
+  .g2-logo{display:none}
+  .g2>.g2-board{grid-column:1;grid-row:1/5}
+  .g2>.g2-bar.g2-ai{grid-column:2;grid-row:1}
+  .g2>.g2-bar:not(.g2-ai){grid-column:2;grid-row:3}
+  .g2>.hand-box{grid-column:2;grid-row:4}
+  .g2 .board{--ch:clamp(28px,calc((100dvh - 16px) / 7),60px)}
+}
+
+/* v18: tutorial que entra en pantallas bajas y en celular horizontal */
+.tut-box{--tsh:clamp(140px,calc(100dvh - 390px),360px)}
+.tut-scene,.tut-scene{height:var(--tsh)}
+.tut-board{--ch:calc((var(--tsh) - 30px) / 5);--cw:min(calc(var(--ch) * 1.35),calc((100vw - 120px)/3))}
+@media(orientation:landscape) and (max-height:500px){
+  .tut-box{--tsh:calc(100dvh - 64px);max-width:min(780px,96vw);display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto 1fr auto;column-gap:18px;padding:12px 16px;max-height:calc(100dvh - 16px);overflow:hidden}
+  .tut-top{grid-column:2;grid-row:1;margin:0}
+  .tut-scene{grid-column:1;grid-row:1/4;margin:0}
+  .tut-text{grid-column:2;grid-row:2;min-height:0;overflow:auto}
+  .tut-nav{grid-column:2;grid-row:3;margin-top:8px}
+}
+@media(max-width:420px),(orientation:landscape) and (max-height:500px){.tut-dots{flex-wrap:nowrap;gap:3px;flex:0 1 auto}.tut-dots i{width:4px;height:4px;flex:none}.tut-dots i.on{width:10px}}
 </style>
 <noscript><style>#sel1-screen{display:none!important}.nojs{display:grid;place-items:center;min-height:100vh;padding:24px;text-align:center;font:600 18px/1.4 system-ui,sans-serif;color:#262A37;background:#F2F4F9}</style></noscript>
 </head>
@@ -752,8 +824,10 @@ button{font-family:inherit;color:inherit}
       <div class="sel-titlerow">
         <h1>Elegí tu mazo</h1>
         <div class="seg" id="diff-seg" role="radiogroup" aria-label="Dificultad"></div>
-        <button class="btn icon sm round" id="filter-btn" onclick="toggleFilterPanel()" aria-expanded="false" aria-label="Filtros" data-tip="Filtros"></button>
-        <button class="btn icon sm round" id="opt-btn" onclick="toggleHomeMenu()" aria-label="Opciones" data-tip="Opciones"></button>
+        <div class="sel-tools">
+          <button class="btn icon sm round" id="filter-btn" onclick="toggleFilterPanel()" aria-expanded="false" aria-label="Filtros" data-tip="Filtros"></button>
+          <button class="btn icon sm round" id="opt-btn" onclick="toggleHomeMenu()" aria-label="Opciones" data-tip="Opciones"></button>
+        </div>
       </div>
       <div class="menu" id="home-menu" style="display:none"></div>
       <div class="sort-bar fpanel" id="sort-bar"></div>
@@ -866,7 +940,7 @@ const esc=t=>String(t).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g
 function cardHTML(cd,mode,dark){
   const sk=cardSkills(cd);
   const skH=sk.map(k=>mode==='full'
-    ?'<span class="sk-chip" data-tip="'+esc(SKILL_TIP[k])+'">'+ic(k)+'<span class="sk-l">'+SKILL_NAME[k]+'</span></span>'
+    ?'<span class="sk-chip" data-tip="'+esc('<b>'+SKILL_NAME[k]+':</b> '+SKILL_TIP[k])+'">'+ic(k)+'</span>'
     :'<span data-tip="'+esc('<b>'+SKILL_NAME[k]+':</b> '+SKILL_TIP[k])+'">'+ic(k)+'</span>').join('');
   const beats=(TYPE_BEATS[cd.type]||[]).map(t=>'<span class="bt t-'+t+'" data-tip="Vence a '+TYPE_NAME[t]+'">'+ic(t)+'</span>').join('');
   return '<div class="cd m-'+mode+' t-'+cd.type+(dark?' dk':'')+'"><div class="cd-name">'+cd.name+'</div>'
