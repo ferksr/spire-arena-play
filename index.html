@@ -1,0 +1,2681 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Spire Arena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  color-scheme:light;
+  --bg:#F3F4F8;--surface:#fff;--surface-2:#F8F9FC;--line:#E7E9F0;--line-2:#D9DCE6;
+  --ink:#262A37;--ink-2:#5A6074;--ink-3:#9298AA;
+  --blue:#6B9FF5;--blue-d:#3F73D1;--blue-s:#E8F0FE;
+  --crimson:#E4627F;--crimson-d:#C23F5F;--crimson-s:#FDEBEF;
+  --cyan:#4FC3D8;--cyan-d:#2A93A8;--cyan-s:#E0F6FA;
+  --violet:#D45FB0;--violet-d:#B03F90;--violet-s:#FBE9F5;
+  --sh-1:0 1px 2px rgba(30,35,60,.05),0 4px 14px rgba(30,35,60,.05);
+  --sh-2:0 2px 4px rgba(30,35,60,.06),0 16px 40px rgba(30,35,60,.12);
+  --font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --display:'Outfit','Inter',system-ui,sans-serif;
+  --ch:clamp(54px,calc((100vh - 64px) / 7 - 6px),92px);
+  --cw:calc(var(--ch) * 1.28);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);min-height:100vh;user-select:none;-webkit-user-select:none;font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;color:inherit}
+.screen{display:none!important}.screen.active{display:block!important}
+.ic{width:1em;height:1em;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
+.t-water{--c:#6B9FF5;--cd:#3F73D1;--cs:#E8F0FE}
+.t-fire{--c:#EF6B6B;--cd:#CB3F3F;--cs:#FDEAEA}
+.t-metal{--c:#A58AEA;--cd:#7A5FCC;--cs:#EEE9FC}
+.t-plant{--c:#5CC98A;--cd:#2E9E5F;--cs:#E1F6EA}
+.t-earth{--c:#DDA845;--cd:#A9701A;--cs:#FBF0D3}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);border-radius:999px;padding:9px 18px;font-weight:600;font-size:13px;cursor:pointer;transition:background .15s,border-color .15s,transform .15s,box-shadow .15s;white-space:nowrap}
+.btn:hover:not(:disabled){border-color:var(--ink-3);background:var(--surface-2)}
+.btn:active:not(:disabled){transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn .ic{font-size:15px}
+.btn.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.primary:hover:not(:disabled){background:#383d4e;border-color:#383d4e}
+.btn.violet{background:var(--violet-s);border-color:var(--violet);color:var(--violet-d)}
+.btn.violet.on{background:var(--violet);color:#fff}
+.btn.sm{padding:6px 12px;font-size:12px}
+.btn.icon{padding:9px;border-radius:50%}
+
+/* ── Selection screen ── */
+.sel-top{display:flex;align-items:center;justify-content:space-between;max-width:1080px;margin:0 auto;padding:22px 24px 0}
+.brand{display:flex;align-items:center;gap:11px}
+.brand-mark{width:34px;height:34px;border-radius:11px;background:linear-gradient(140deg,#9CC0FA,#B9A6F0);display:grid;place-items:center;color:#fff;box-shadow:var(--sh-1)}
+.brand-mark .ic{font-size:20px;stroke-width:2}
+.brand-name{font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:.22em;text-transform:uppercase}
+.sel-wrap{max-width:1080px;margin:0 auto;padding:40px 24px 150px}
+.sel-intro h1{font-family:var(--display);font-weight:600;font-size:34px;letter-spacing:-.01em}
+.sel-intro p{color:var(--ink-2);margin-top:6px;max-width:520px}
+.sort-bar{display:flex;flex-direction:column;gap:10px;margin:28px 0 20px}
+.frow{display:flex;align-items:center;gap:14px}
+.flabel{width:44px;font-size:11px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.1em;flex-shrink:0}
+.fchips{display:flex;flex-wrap:wrap;gap:6px}
+.fchip{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 12px 6px 10px;font-weight:500;font-size:12.5px;color:var(--ink-2);cursor:pointer;transition:all .15s}
+.fchip .ic{font-size:14px;color:var(--cd,var(--ink-2))}
+.fchip:hover{border-color:var(--line-2);background:var(--surface-2)}
+.fchip.on{background:var(--cs,var(--ink));border-color:var(--cd,var(--ink));color:var(--cd,#fff);font-weight:600}
+.fchip[data-kind=skill].on{background:var(--ink);border-color:var(--ink);color:#fff}
+.fchip[data-kind=skill].on .ic{color:#fff}
+.no-match{grid-column:1/-1;text-align:center;color:var(--ink-3);padding:40px 0}
+.cards-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.co{position:relative;cursor:pointer;transition:transform .18s,box-shadow .18s,border-color .18s}
+.co:hover{transform:translateY(-3px)}
+.co .cd{height:100%;box-shadow:var(--sh-1)}
+.co:hover .cd{box-shadow:var(--sh-2)}
+.co.sel .cd{border-color:var(--cd);box-shadow:0 0 0 3px var(--cs),var(--sh-1)}
+.co-check{position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:50%;background:var(--cd);color:#fff;display:grid;place-items:center;opacity:0;transform:scale(.6);transition:all .18s}
+.co-check .ic{font-size:13px;stroke-width:2.6}
+.co.sel .co-check{opacity:1;transform:none}
+
+/* ── Card component ── */
+.cd{position:relative;background:#fff;border:1.5px solid var(--c);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;align-items:center;text-align:center}
+.cd-name{font-family:var(--display);font-weight:600;color:var(--ink);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cd-art{display:grid;place-items:center;border-radius:50%;background:var(--cs);color:var(--cd);flex-shrink:0}
+.cd-beats{display:flex;align-items:center;justify-content:center;color:var(--ink-3)}
+.cd-beats .bt{color:var(--cd);display:grid;place-items:center}
+.cd-sk{display:flex;flex-wrap:wrap;justify-content:center;color:var(--ink-2)}
+.m-full{padding:16px 10px 14px;gap:10px;min-height:196px}
+.m-full .cd-name{font-size:15px}
+.m-full .cd-art{width:56px;height:56px;font-size:28px}
+.m-full .cd-beats{gap:4px;font-size:11px;font-weight:500;color:var(--ink-3)}
+.m-full .cd-beats .ic{font-size:14px}
+.m-full .cd-sk{gap:5px}
+.sk-chip{display:inline-flex;align-items:center;gap:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:2px 8px 2px 6px;font-size:11px;font-weight:500;color:var(--ink-2)}
+.sk-chip .ic{font-size:12px}
+.m-hand{width:100%;padding:13px 6px 9px;gap:7px}
+.m-hand .cd-name{font-size:13px}
+.m-hand .cd-art{width:40px;height:40px;font-size:21px}
+.m-hand .cd-beats{gap:3px}.m-hand .cd-beats .ic{font-size:12px}
+.m-hand .cd-sk{gap:6px}.m-hand .cd-sk .ic{font-size:14px}
+.m-cell{width:100%;height:100%;justify-content:center;gap:2px;border:0;border-radius:0;background:none;padding:5px 3px 3px}
+.m-cell .cd-name{font-size:10.5px;line-height:1.15}
+.m-cell .cd-art{width:calc(var(--ch) * .32);height:calc(var(--ch) * .32);font-size:calc(var(--ch) * .19);background:var(--cs)}
+.m-cell .cd-beats .ic{font-size:9px}.m-cell .cd-beats{gap:2px}
+.m-cell .cd-sk{gap:3px}.m-cell .cd-sk .ic{font-size:10.5px}
+
+/* franja de tipo: la misma en todas las cartas */
+.cd::before{content:'';position:absolute;left:0;right:0;top:0;height:5px;background:var(--c)}
+.m-cell::before{height:3px}
+.m-cell{padding-top:calc(var(--ch) * .06)!important}
+.m-full{padding-top:20px}
+/* dark (P2) card variant: mismo diseño sobre gris oscuro */
+.cd.dk{background:#2A2D39;border-color:color-mix(in srgb,var(--c) 55%,#2A2D39)}
+.cd.dk.m-cell{background:none;border:0}
+.cd.dk .cd-name{color:#EEF0F6}
+.cd.dk .cd-art{background:color-mix(in srgb,var(--c) 28%,#2A2D39);color:var(--c)}
+.cd.dk .cd-beats .bt{color:var(--c)}
+.cd.dk .cd-sk{color:#B9BECE}
+
+/* ── Selection dock ── */
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(255,255,255,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line)}
+.dock-in{max-width:1080px;margin:0 auto;padding:14px 24px;display:grid;grid-template-columns:auto 1fr auto;gap:26px;align-items:center}
+.dock-slots{display:grid;grid-template-columns:repeat(8,34px);gap:6px}
+.slot{width:34px;height:34px;border-radius:10px;border:1.5px dashed var(--line-2);display:grid;place-items:center;transition:all .15s}
+.slot.full{border:1.5px solid var(--c);background:var(--cs);color:var(--cd);cursor:pointer;animation:pop .2s ease-out}
+.slot.full:hover{background:var(--line)}
+.slot .ic{font-size:17px}
+.dock-info{font-size:12.5px;color:var(--ink-2);min-width:0;display:flex;flex-direction:column;gap:5px}
+.dock-info b{font-family:var(--display);font-size:14px;font-weight:600;color:var(--ink)}
+.dock-info .tip-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.dock-info .tip-desc{color:var(--ink-3)}
+.dock-cta{display:flex;align-items:center;gap:14px}
+.dock-count{font-family:var(--display);font-weight:600;font-size:15px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+
+/* ── Rules modal ── */
+.modal{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(38,42,55,.28);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.modal.open{display:flex;animation:fade .2s ease-out}
+.modal-box{background:var(--surface);border-radius:22px;box-shadow:var(--sh-2);width:100%;max-width:680px;max-height:calc(100vh - 40px);overflow:auto;padding:30px 32px 28px;user-select:text;-webkit-user-select:text}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.modal-head h2{font-family:var(--display);font-size:22px;font-weight:600}
+.rule-sec{margin-top:22px}
+.rule-sec h3{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
+.rule-sec p{color:var(--ink-2);font-size:13.5px}
+.rule-sec p+p{margin-top:6px}
+.rule-sec b{color:var(--ink);font-weight:600}
+.beat-list{display:grid;grid-template-columns:1fr;gap:6px;margin-top:4px}
+.beat-item{display:grid;grid-template-columns:96px 1fr;align-items:center;gap:2px 10px;background:#fff;border:1.5px solid var(--c);border-radius:12px;padding:8px 12px;font-size:12.5px;color:var(--cd)}
+.beat-item .bh{display:flex;align-items:center;gap:7px;font-weight:700;grid-row:1/3}
+.beat-item .bh .ic{font-size:20px;box-sizing:content-box;padding:6px;border-radius:50%;background:var(--cs)}
+.beat-item .bl{display:flex;align-items:center;gap:6px;color:var(--ink-2)}
+.beat-item .bl .ic{font-size:13px;color:var(--cd)}
+.skill-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sk-row{display:flex;gap:10px;align-items:flex-start;background:var(--surface-2);border-radius:12px;padding:10px 12px}
+.sk-row .ic{font-size:18px;margin-top:1px;color:var(--ink)}
+.sk-row strong{display:block;font-size:12.5px;font-weight:600}
+.sk-row span{display:block;font-size:12px;color:var(--ink-2);line-height:1.4}
+
+/* ── Game layout ── */
+#game-screen.active{display:block!important}
+.arena{min-height:100vh;display:grid;grid-template-rows:auto;grid-template-columns:minmax(250px,310px) auto minmax(250px,310px);gap:30px;justify-content:center;align-items:stretch;padding:24px}
+.col{display:flex;flex-direction:column;gap:14px;min-height:0}
+.col-l{justify-content:flex-start}
+.col-r{justify-content:flex-end}
+.board-wrap{align-self:center}
+.status{margin-bottom:auto}
+
+/* ── Player panels ── */
+.pn{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--sh-1);display:flex;flex-direction:column;gap:14px;transition:border-color .3s,box-shadow .3s}
+.pn.active.p-p1{border-color:var(--ink-2);box-shadow:0 0 0 4px rgba(38,42,55,.08),var(--sh-1)}
+.pn-ai{background:#2A2D39;border-color:#3D4150;color:#EEF0F6;box-shadow:0 2px 10px rgba(30,35,60,.18)}
+.pn.active.p-ai{border-color:#8087A3;box-shadow:0 0 0 4px rgba(42,45,57,.12),0 2px 10px rgba(30,35,60,.18)}
+.pn.flash{animation:flash .9s ease-out}
+.pn-head{display:flex;align-items:center;gap:12px}
+.pn-avatar{width:38px;height:38px;border-radius:12px;display:grid;place-items:center}
+.pn-avatar .ic{font-size:20px}
+.p-p1 .pn-avatar{background:var(--surface-2);color:var(--ink)}
+.p-ai .pn-avatar{background:#3A3E4E;color:#E4E7F0}
+.pn-ai .pn-name{color:#fff}.pn-ai .pn-state,.pn-ai.active .pn-state{color:#9AA0B4}.pn-ai .pn-temples{background:#343848}.pn-ai .pn-stats,.pn-ai .deck-chip{color:#9AA0B4}.pn-ai .acts-txt,.pn-ai .deck-chip b{color:#fff}.pn-ai .acts .ic{color:#4A4F61}.pn-ai .acts .ic.on{color:#E4E7F0;fill:#4A4F61}
+.pn-name{font-family:var(--display);font-weight:600;font-size:16px;line-height:1.2}
+.pn-state{font-size:12px;color:var(--ink-3);display:flex;align-items:center;gap:6px}
+.pn.active .pn-state{color:var(--ink-2)}
+.pn-temples{display:flex;align-items:flex-end;justify-content:space-between;gap:6px;background:var(--surface-2);border-radius:12px;padding:10px 14px}
+.pt{display:flex;flex-direction:column;align-items:center;gap:5px}
+.pt .ic{font-size:20px}.pt.big .ic{font-size:27px}
+.p-p1 .pt .ic{color:var(--ink)}.p-ai .pt .ic{color:#E4E7F0}
+.pt.dead .ic{color:var(--line-2)!important}
+.pips{display:flex;gap:3px}
+.pip{width:7px;height:7px;border-radius:50%;background:var(--line-2)}
+.pt.big .pip{width:8px;height:8px}
+.p-p1 .pip.on{background:var(--ink)}.p-ai .pip{background:#4A4F61}.p-ai .pip.on{background:#E4E7F0}
+.pn-stats{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--ink-2)}
+.acts{display:flex;align-items:center;gap:3px}
+.acts .ic{font-size:16px;color:var(--line-2)}
+.acts .ic.on{color:var(--cyan-d);fill:var(--cyan-s)}
+.acts-txt{font-weight:600;margin-left:6px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.deck-chip{display:flex;align-items:center;gap:6px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.deck-chip .ic{font-size:15px}
+.deck-chip b{color:var(--ink-2);font-weight:600}
+
+/* ── Hands ── */
+.hand-title{font-size:11px;font-weight:600;color:var(--ink-3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.ai-hand{display:flex;gap:6px}
+.card-back{flex:1;max-width:58px;aspect-ratio:3/4;border-radius:10px;background:linear-gradient(145deg,#3A3E4E,#2A2D39);border:1.5px solid #4A4F61;display:grid;place-items:center;color:#7C829A}
+.card-back .ic{font-size:18px;stroke-width:1.6}
+.hand-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.hcard{cursor:pointer;transition:transform .18s,box-shadow .18s,opacity .18s;border-radius:14px}
+.hcard .cd{box-shadow:var(--sh-1);transition:border-color .15s,box-shadow .18s}
+.hcard:hover .cd{box-shadow:var(--sh-2)}
+.hcard:hover{transform:translateY(-3px)}
+.hcard.hsel .cd{border-color:var(--cd);box-shadow:0 0 0 3px var(--cs),var(--sh-2)}
+.hcard.hsel{transform:translateY(-4px)}
+.hcard.hdim{opacity:.5;cursor:default;pointer-events:none}
+.hand-empty{grid-column:1/-1;text-align:center;font-size:12.5px;color:var(--ink-3);padding:18px 0;border:1.5px dashed var(--line-2);border-radius:14px}
+
+/* ── Board ── */
+.board{display:grid;grid-template-columns:repeat(3,var(--cw));grid-template-rows:repeat(7,var(--ch));gap:6px;padding:10px;background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:var(--sh-1);transition:opacity .3s}
+.board.dimmed{opacity:.7;pointer-events:none}
+.cell{--ring:var(--cyan);background:var(--surface-2);border:1.5px solid var(--line);border-radius:12px;position:relative;display:grid;place-items:center;overflow:hidden;transition:background .15s,border-color .15s,box-shadow .15s}
+.cell.clickable{cursor:pointer}
+.cell.c-p1{background:#fff;border-color:var(--c,#CBD2E0);box-shadow:0 2px 6px rgba(30,35,60,.10)}
+.cell.c-ai{background:#2A2D39;border-color:color-mix(in srgb,var(--c,#4A4F61) 55%,#2A2D39);box-shadow:0 2px 6px rgba(30,35,60,.22)}
+.cell.enter .cd{animation:pop .28s cubic-bezier(.2,.9,.3,1.3)}
+.cell.sel-cell{border-color:var(--ink)!important;box-shadow:0 0 0 3px rgba(38,42,55,.12)}
+.cell.vmove{--ring:var(--cyan);background:var(--cyan-s);border-color:var(--cyan);animation:ring 1.4s ease-out infinite}
+.cell.vmove:not(:has(.cd))::after{content:'';width:9px;height:9px;border-radius:50%;background:var(--cyan)}
+.cell.vattk,.cell.vattk-temple{--ring:var(--crimson);border-color:var(--crimson);animation:ring 1.4s ease-out infinite}
+.cell.vattk{background:var(--crimson-s)}
+.cell.vattk-temple{background:var(--crimson-s)}
+.cell.vranged{--ring:var(--violet);background:var(--violet-s);border-color:var(--violet);animation:ring 1.4s ease-out infinite}
+.cell.vcombo{--ring:var(--violet);background:var(--violet-s);border-color:var(--violet);animation:ring 1.4s ease-out infinite;z-index:2}
+.cell.vcombo-lose{--ring:var(--crimson);background:var(--crimson-s)!important;border-color:var(--crimson)!important;animation:ring 1.4s ease-out infinite;z-index:2}
+.cell.temple{background:var(--surface)}
+.cell.temple.o-p1{background:#fff;border-color:#CBD2E0;box-shadow:0 2px 6px rgba(30,35,60,.10)}
+.cell.temple.o-ai{background:#2A2D39;border-color:#3D4150;box-shadow:0 2px 6px rgba(30,35,60,.22)}
+.cell.temple.hit{animation:shake .4s ease-out}
+.tpl{display:flex;flex-direction:column;align-items:center;gap:calc(var(--ch) * .05)}
+.tpl .ic{font-size:calc(var(--ch) * .34)}
+.tpl.big .ic{font-size:calc(var(--ch) * .42)}
+.o-p1 .tpl .ic{color:var(--ink)}.o-ai .tpl .ic{color:#E4E7F0}.o-ai .tpl-label{color:#9AA0B4}
+.tpl-label{font-size:9.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.tpl .pips .pip{width:6px;height:6px}
+.o-p1 .tpl .pip.on{background:var(--ink)}.o-ai .tpl .pip{background:#4A4F61}.o-ai .tpl .pip.on{background:#E4E7F0}
+.cell.is-ruin{background:transparent;border:1.5px dashed var(--line-2)}
+.ruin{color:var(--line-2);display:flex;flex-direction:column;align-items:center;gap:2px}
+.ruin .ic{font-size:calc(var(--ch) * .3)}
+.ruin span{font-size:8.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+.cell-marker{position:absolute;top:5px;left:5px;color:var(--violet-d);z-index:3}
+.cell-marker .ic{font-size:13px;stroke-width:2.2}
+.badge{position:absolute;bottom:4px;right:4px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(30,35,60,.2);display:grid;place-items:center;z-index:4}
+.badge .ic{font-size:12px;stroke-width:2.4}
+.badge.win{color:var(--cyan-d)}.badge.lose{color:var(--crimson-d)}.badge.blast{color:var(--violet-d)}.badge.tie,.badge.none{color:var(--ink-3)}
+.dir-chip{position:absolute;top:4px;left:4px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(30,35,60,.2);display:grid;place-items:center;z-index:3;color:var(--ink-2)}
+.dir-chip .ic{font-size:12px;stroke-width:2.4}
+.ai-hl-src{box-shadow:0 0 0 3px var(--ink-3)!important}
+.ai-hl-tgt{box-shadow:0 0 0 3px var(--crimson)!important}
+.ai-flash-overlay{position:absolute;inset:0;display:grid;place-items:center;z-index:10;animation:fade .25s ease-out;background:rgba(155,132,232,.2);color:var(--violet-d)}
+.ai-flash-overlay.blast{background:rgba(228,98,127,.2);color:var(--crimson-d)}
+.ai-flash-overlay .ic{font-size:30px;stroke-width:2}
+
+/* ── Status / controls ── */
+.status{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:11px 14px;font-size:12.5px;color:var(--ink-2);display:flex;align-items:center;gap:10px;line-height:1.4}
+.status b{color:var(--ink);font-weight:600}
+.status.charge{background:var(--cyan-s);border-color:#BDEAF2}
+.status.combo-active{background:var(--violet-s);border-color:#D6CCF6}
+.status.thinking{background:#2A2D39;border-color:#3D4150;color:#EEF0F6}.status.thinking .ic{color:#9AA0B4}
+.status .ic{font-size:16px;color:var(--ink-3)}
+.legend-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 4px 0 8px;vertical-align:0}
+.legend-dot{margin-left:10px}
+.legend-dot.mv{background:var(--cyan)}.legend-dot.at{background:var(--crimson)}.legend-dot.rg{background:var(--violet)}
+.dot-anim{display:inline-flex;gap:3px;margin-left:2px}
+.dot-anim span{width:5px;height:5px;border-radius:50%;background:currentColor;animation:bounce .9s ease infinite}
+.dot-anim span:nth-child(2){animation-delay:.15s}.dot-anim span:nth-child(3){animation-delay:.3s}
+.controls{display:flex;flex-wrap:wrap;gap:8px}
+.controls .btn.primary{flex:1}
+
+/* ── Log ── */
+.log{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh-1);display:flex;flex-direction:column;min-height:140px;flex:1 1 0;overflow:hidden}
+.log-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 8px 16px}
+.log-head span{font-size:11px;font-weight:600;color:var(--ink-3);letter-spacing:.1em;text-transform:uppercase}
+.log-body{flex:1 1 0;min-height:0;overflow-y:auto;padding:0 16px 12px;font-size:12.5px;line-height:1.5;user-select:text;-webkit-user-select:text;cursor:text}
+.log-body::-webkit-scrollbar{width:4px}.log-body::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:2px}
+.log-entry{color:var(--ink-2);padding:5px 0;border-bottom:1px solid var(--surface-2);word-break:break-word}
+.log-entry b{color:var(--ink);font-weight:600}
+.log-entry.sep{color:var(--ink-3);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border:0;padding:10px 0 3px;display:flex;align-items:center;gap:8px}
+.log-entry.sep::after{content:'';flex:1;height:1px;background:var(--line)}
+.log-entry.sep b{color:var(--ink-3)}
+
+/* ── Game over ── */
+.over{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(243,244,248,.7);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);animation:fade .35s ease-out}
+.over-box{background:var(--surface);border-radius:26px;box-shadow:var(--sh-2);padding:40px 44px 34px;text-align:center;max-width:380px;width:calc(100% - 40px);animation:rise .45s cubic-bezier(.2,.9,.3,1)}
+.over-mark{width:64px;height:64px;border-radius:20px;margin:0 auto 18px;display:grid;place-items:center}
+.over-mark .ic{font-size:32px;stroke-width:1.7}
+.over-mark.win{background:var(--surface-2);color:var(--ink)}
+.over-mark.lose{background:#2A2D39;color:#E4E7F0}
+.over-title{font-family:var(--display);font-size:28px;font-weight:600}
+.over-sub{color:var(--ink-2);margin:6px 0 26px;font-size:13.5px}
+.over-btns{display:flex;flex-direction:column;gap:8px}
+
+/* ── Motion ── */
+@keyframes pop{from{transform:scale(.82);opacity:0}to{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes rise{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+@keyframes ring{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ring) 50%,transparent)}100%{box-shadow:0 0 0 8px color-mix(in srgb,var(--ring) 0%,transparent)}}
+@keyframes flash{0%{transform:scale(.97)}40%{transform:scale(1.015)}100%{transform:none}}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* ── Responsive ── */
+.btn-log,.log-close{display:none}
+@media(max-width:1100px){.cards-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:960px){
+  :root{--ch:clamp(46px,calc((100dvh - 326px - 44px) / 7),96px);--cw:min(calc((100vw - 56px) / 3),calc(var(--ch) * 1.6))}
+  body.in-game{overflow:hidden;overscroll-behavior:none}
+  .arena{height:100dvh;min-height:0;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 10px calc(8px + env(safe-area-inset-bottom))}
+  .col{display:contents}
+  .arena>*,.col>*{width:100%;max-width:520px;flex-shrink:0}
+  .pn-ai{order:1}.board-wrap{order:2;flex:1 1 auto!important;width:auto!important;display:flex;align-items:center;min-height:0}
+  .status{order:3;margin:0!important}.hand-box{order:4}.controls{order:5}.pn-p1{order:6}
+  .ai-hand-box{display:none}
+  .board{gap:5px;padding:8px;border-radius:18px}
+  .pn{flex-direction:row;align-items:center;padding:7px 12px;gap:8px;border-radius:16px}
+  .pn-head{gap:8px;flex:0 0 auto}
+  .pn-avatar{width:30px;height:30px;border-radius:10px}.pn-avatar .ic{font-size:16px}
+  .pn-name{font-size:13px}.pn-state{font-size:10.5px}
+  .pn-temples{background:none!important;padding:0;gap:12px;flex:1;justify-content:center}
+  .pt .ic{font-size:15px}.pt.big .ic{font-size:20px}.pt{gap:3px}
+  .pn-stats{flex-direction:column;align-items:flex-end;gap:1px;font-size:11px}
+  .acts .ic:not(:first-child){display:none}.acts .ic{font-size:14px}
+  .status{padding:6px 12px;min-height:30px;font-size:11.5px;border-radius:12px;gap:8px}
+  .status>div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .hand-title{display:none}
+  .hand-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0;margin:0;overflow:visible}
+  .hand-grid .hcard{flex:none}
+  .m-hand{padding:7px 2px 6px;gap:5px}
+  .m-hand .cd-name{font-size:11px}.m-hand .cd-art{width:30px;height:30px;font-size:16px}
+  .m-hand .cd-sk{gap:4px}.m-hand .cd-sk .ic{font-size:12px}
+  .controls{flex-wrap:nowrap;gap:6px}.controls .btn{padding:9px 14px}.controls .btn.sm{padding:9px 12px}
+  .btn-log{display:inline-flex}
+  .log{display:none;order:9}
+  .log.sheet{display:flex;position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));height:56dvh;max-width:none;width:auto;z-index:40;box-shadow:var(--sh-2);flex:none}
+  .log-close{display:inline-flex}
+  .log-head{gap:6px}.log-head .grow{flex:1}
+}
+@media(max-width:960px){.m-cell .cd-beats{display:none}.m-cell{padding:4px 2px 3px;gap:3px}.m-cell .cd-art{width:calc(var(--ch) * .34);height:calc(var(--ch) * .34);font-size:calc(var(--ch) * .2)}}
+@media(max-width:960px) and (max-height:800px){
+  .m-hand .cd-beats{display:none}
+  .m-cell{gap:1px;padding:2px 2px}
+  .m-cell .cd-name{font-size:10px}
+  .m-cell .cd-art{width:calc(var(--ch) * .3);height:calc(var(--ch) * .3);font-size:calc(var(--ch) * .18)}
+  .m-cell .cd-sk .ic{font-size:10px}
+}
+@media(max-width:700px){
+  /* Selection: one fixed screen, grid fills the space */
+  html:has(#sel1-screen.active),body:has(#sel1-screen.active){overflow:hidden;overscroll-behavior:none}
+  body:has(#sel1-screen.active){min-height:0}
+  #sel1-screen.active{display:flex!important;flex-direction:column;position:fixed;inset:0;overflow:hidden}
+  .sel-top{padding:12px 14px 0;width:100%}
+  .brand-mark{width:28px;height:28px;border-radius:9px}.brand-mark .ic{font-size:16px}
+  .brand-name{font-size:12px}
+  .sel-wrap{flex:1;min-height:0;display:flex;flex-direction:column;padding:10px 14px 0;width:100%}
+  .sel-intro{display:none}
+  .sort-bar{margin:0 0 10px;gap:6px}
+  .frow{gap:8px}.flabel{display:none}
+  .fchips{display:grid;width:100%;gap:5px}
+  .frow:first-child .fchips{grid-template-columns:repeat(5,1fr)}
+  .frow:last-child .fchips{grid-template-columns:repeat(6,1fr)}
+  .fchip{flex-direction:column;gap:2px;padding:6px 0 5px;border-radius:12px;font-size:10px;justify-content:center}
+  .fchip .ic{font-size:16px}
+  .cards-grid{flex:1;min-height:0;grid-template-columns:repeat(4,1fr);grid-auto-rows:1fr;grid-template-rows:repeat(5,1fr);gap:7px;padding:3px 3px 6px;overflow:visible}
+  .co:hover{transform:none}
+  .m-full{min-height:0;height:100%;padding:7px 3px 6px;gap:5px;justify-content:center;border-radius:12px}
+  .m-full .cd-name{font-size:11px}
+  .m-full .cd-art{width:32px;height:32px;font-size:17px}
+  .m-full .cd-beats{font-size:0;gap:3px}.m-full .cd-beats .ic{font-size:11px}
+  .m-full .cd-sk{gap:3px}
+  .sk-chip{padding:2px 3px;border:0;background:none}.sk-chip .ic{font-size:12px}.sk-l{display:none}
+  .co-check{top:4px;right:4px;width:16px;height:16px}.co-check .ic{font-size:10px}
+  .dock{position:static;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom)}
+  .dock-in{grid-template-columns:1fr;gap:8px;padding:8px 14px 10px}
+  .dock-info{display:flex;min-height:36px;font-size:11.5px;gap:3px}
+  .dock-info b{font-size:13px}
+  .dock-info .tip-row .sk-chip{padding:1px 6px 1px 5px;border:1px solid var(--line);background:var(--surface-2)}
+  .dock-info .tip-row .sk-l{display:inline}
+  .dock-slots{grid-template-columns:repeat(8,1fr);order:1}.slot{width:auto;aspect-ratio:1;height:auto;max-width:38px;justify-self:center}
+  .dock-info{order:0}.dock-cta{order:2;justify-content:space-between}
+  .modal-box{padding:24px 20px}.skill-list{grid-template-columns:1fr}
+}
+
+/* ══ v3: tablero grande, menú único, tooltips ══ */
+#tt{position:fixed;z-index:80;max-width:min(270px,calc(100vw - 16px));background:var(--ink);color:#fff;border-radius:12px;padding:9px 12px;font-size:12px;line-height:1.45;pointer-events:none;opacity:0;transform:translateY(3px);transition:opacity .12s,transform .12s;box-shadow:var(--sh-2);user-select:none;-webkit-user-select:none;touch-action:pan-y;cursor:pointer}
+#tt.on{opacity:1;transform:none;pointer-events:auto}
+#tt b{font-weight:600}
+.cd-mid{display:flex;flex-direction:column;align-items:center;gap:6px}
+.cd-beats .arr{display:none;color:var(--ink-2)}
+.cd-beats .arr .ic{font-size:12px;stroke-width:2}
+.m-hand .cd-mid,.m-cell .cd-mid{flex-direction:row;gap:5px}
+.m-hand .cd-beats .arr,.m-cell .cd-beats .arr{display:block}
+.cd-beats .bt{pointer-events:auto}
+.m-full .cd-beats .vl{font-size:11px;color:var(--ink-3);margin-right:2px}
+.m-hand .cd-beats .ic{font-size:11px}
+.m-cell .cd-name{font-size:10.5px}
+/* paneles compactos (una sola línea) */
+.pn{position:relative;flex-direction:row;align-items:center;gap:10px;padding:10px 12px;box-shadow:var(--sh-1)}
+.pn.active.p-p1,.pn.active.p-ai{box-shadow:var(--sh-1)}
+.pn.active.p-p1{border-color:var(--line)}
+.pn.active.p-ai{border-color:#3D4150}
+.pn-avatar{width:30px;height:30px;border-radius:10px}.pn-avatar .ic{font-size:16px}
+.pn-name{font-family:var(--display);font-weight:600;font-size:14px}
+.pn-stats,.ctl-stats{display:flex;align-items:center;gap:12px;margin-left:auto;font-size:12px}
+.ctl-stats{display:none;margin:0 auto 0 2px;color:var(--ink-2)}
+.ctl-stats .acts-txt{color:var(--ink)}
+.acts,.deck-chip{display:inline-flex;align-items:center;gap:3px}
+.menu-btn{margin-left:2px;background:transparent;border-color:#4A4F61;color:#E4E7F0}
+.menu-btn:hover:not(:disabled){background:#3A3E4E;border-color:#6D7390}
+.menu{position:absolute;right:8px;top:calc(100% + 6px);z-index:45;min-width:190px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh-2);padding:6px;display:flex;flex-direction:column}
+.menu-item{display:flex;align-items:center;gap:10px;background:none;border:0;border-radius:10px;padding:10px 12px;font-size:13px;font-weight:500;cursor:pointer;text-align:left}
+.menu-item:hover{background:var(--surface-2)}.menu-item .ic{font-size:17px;color:var(--ink-2)}
+.menu-bg{position:fixed;inset:0;z-index:44}
+/* estado de turno único */
+.turn-pill{flex-shrink:0;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:999px}
+.turn-pill.me{background:var(--ink);color:#fff}.turn-pill.ai{background:#2A2D39;color:#E4E7F0}
+.status.thinking .turn-pill.ai{background:#3A3E4E}
+/* contador */
+.clock{margin-left:auto;display:inline-flex;align-items:center;gap:4px;flex-shrink:0;font-weight:600;font-size:11.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}.clock .ic{font-size:14px}.status.ai .clock{color:#9AA0B4}
+.over-mark.draw{background:var(--surface-2);color:var(--ink-2)}
+/* fin de partida: casilleros decisivos */
+.cell.end-key{outline:3px solid var(--ink);outline-offset:-2px;box-shadow:0 0 0 4px rgba(38,42,55,.16),0 6px 18px rgba(38,42,55,.3);z-index:3;animation:keypulse 1.8s ease-in-out infinite}
+.board.has-keys .cell:not(.end-key){opacity:.5}
+@keyframes repopulse{50%{box-shadow:0 0 0 6px rgba(38,42,55,.12)}}
+.btn.repo-hot{animation:repopulse 1.6s ease-in-out infinite}
+@keyframes keypulse{50%{box-shadow:0 0 0 7px rgba(38,42,55,.1),0 6px 18px rgba(38,42,55,.3)}}
+.over-sub b{color:var(--ink);font-weight:600}
+/* aviso de fin de partida */
+.clock.warn{font-size:13px;font-weight:800;padding:3px 10px;border-radius:999px;background:var(--crimson-s);color:var(--crimson-d);border:1px solid #F3C5D0}
+.clock.warn .ic{font-size:15px;stroke-width:2.2}
+.clock.hot{background:var(--crimson);color:#fff;border-color:var(--crimson);animation:hot 1s ease-in-out infinite}
+.status.ai .clock.warn{background:var(--crimson-s);color:var(--crimson-d)}.status.ai .clock.hot{background:var(--crimson);color:#fff}
+@keyframes hot{50%{transform:scale(1.07)}}
+/* registro como panel */
+.log{display:none}
+.log.sheet{display:flex;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom));width:min(440px,calc(100vw - 20px));height:min(60dvh,520px);z-index:60;box-shadow:var(--sh-2);flex:none;order:0}
+.log-close{display:inline-flex}
+.col-l{justify-content:flex-start}
+@media(max-width:960px){
+  :root{--ch:clamp(50px,calc((100dvh - 238px - 36px) / 7),104px);--cw:min(calc((100vw - 28px) / 3),calc(var(--ch) * 1.75))}
+  .arena{padding:6px 8px calc(6px + env(safe-area-inset-bottom));gap:5px}
+  .board{padding:6px;gap:4px;border-radius:16px}
+  .pn-p1{display:none}
+  .ctl-stats{display:flex}
+  .pn{padding:6px 10px;gap:8px;border-radius:14px}
+  .controls{align-items:center}.controls .btn.primary{flex:1;padding:10px 14px}
+  .status{padding:5px 10px;min-height:28px}
+  .m-hand{padding:6px 2px 5px;gap:4px}
+  .m-hand .cd-art{width:26px;height:26px;font-size:14px}
+  .m-hand .cd-beats .ic{font-size:10px}
+  .m-hand .cd-beats{display:flex}
+  .hand-grid{gap:5px}
+  .m-cell .cd-beats{display:flex}
+  .controls .btn.cancel .lbl{display:none}.controls .btn.cancel{padding:9px 11px}
+  .controls .btn.primary{min-width:0;padding:10px 10px}
+  .ctl-stats{gap:8px;font-size:11px}
+}
+@media(max-width:960px) and (max-height:800px){.m-hand .cd-beats{display:flex}}
+@media(max-width:700px){
+  .sel-top{padding:10px 12px 0}
+  .sel-wrap{padding:8px 12px 0}
+  .sort-bar{margin:0 0 6px;gap:5px}
+  .fchip{padding:4px 0 3px;border-radius:10px;font-size:9.5px}.fchip .ic{font-size:14px}
+  .cards-grid{grid-template-rows:none;grid-auto-rows:minmax(66px,92px);gap:5px;overflow-y:auto;overflow-x:hidden;padding:2px;align-content:start;scrollbar-width:none}
+  .cards-grid::-webkit-scrollbar{display:none}
+  .m-full{padding:4px 2px 4px;gap:2px;justify-content:center;overflow:hidden}
+  .m-full .cd-name{font-size:10.5px}
+  .m-full .cd-mid{flex-direction:row;gap:4px}
+  .m-full .cd-art{width:24px;height:24px;font-size:13px;box-shadow:none}
+  .m-full .cd-beats{font-size:0;gap:2px}.m-full .cd-beats .vl{display:none}
+  .m-full .cd-beats .arr{display:block}.m-full .cd-beats .ic{font-size:10px}
+  .m-full .cd-sk{gap:2px;flex-wrap:nowrap}.m-full .sk-chip .ic{font-size:11px}
+  .dock-in{display:flex;flex-direction:column;gap:4px;padding:6px 12px 8px}
+  .dock-info{order:0;min-height:30px;font-size:11px;gap:2px}
+  .dock-info b{font-size:12px}
+  .dock-row{display:flex;align-items:center;justify-content:space-between;gap:8px;order:1}
+  .dock-slots{display:grid;grid-template-columns:repeat(8,25px);gap:3px}
+  .slot{width:25px;height:25px;border-radius:8px;max-width:none}.slot .ic{font-size:14px}
+  .dock-cta{gap:8px}.dock-cta .btn{padding:8px 18px}
+  .dock-count{font-size:13px}
+}
+@media(min-width:701px){.dock-row{display:contents}.dock-slots{order:0}.dock-info{order:1}.dock-cta{order:2}}
+
+/* v4: cada dato de la carta en su propia fila (nombre, tipo, a quiénes vence, skills) */
+.cd-mid{display:contents}
+.m-full{gap:9px}
+.m-full .cd-name{font-size:13px}
+.m-full .cd-art{width:66px;height:66px;font-size:36px}
+.m-hand{gap:3px;padding:6px 3px 5px}
+.m-hand .cd-name{font-size:10px}
+.m-hand .cd-art{width:36px;height:36px;font-size:20px}
+.m-hand .cd-beats .ic{font-size:11px}.m-hand .cd-sk .ic{font-size:13px}
+.m-cell{gap:calc(var(--ch) * .02);padding:calc(var(--ch) * .035) 2px}
+.m-cell .cd-name{font-size:clamp(7.5px,calc(var(--ch) * .14),9.5px);line-height:1.05}
+.m-cell .cd-art{width:calc(var(--ch) * .33);height:calc(var(--ch) * .33);font-size:calc(var(--ch) * .2)}
+.m-cell .cd-beats .ic,.m-cell .cd-sk .ic{font-size:clamp(8px,calc(var(--ch) * .16),12px)}
+.m-cell .cd-beats,.m-cell .cd-sk{line-height:1}
+@media(max-width:700px){
+  .cards-grid{grid-auto-rows:minmax(76px,96px)}
+  .m-full{gap:2px;padding:4px 2px}
+  .m-full .cd-name{font-size:9.5px}
+  .m-full .cd-art{width:28px;height:28px;font-size:15px}
+  .m-full .cd-beats .ic{font-size:10px}.m-full .cd-sk .ic{font-size:11px}
+}
+
+/* v5: panel superior separado del tablero y estado de turno acorde al color de cada jugador */
+.turn-pill.me{background:#fff;color:var(--ink);border:1.5px solid var(--ink-3)}
+.turn-pill.ai{background:#2A2D39;color:#E4E7F0;border:1.5px solid #2A2D39}
+@media(max-width:960px){
+  .pn-stats{flex-direction:row;align-items:center;gap:10px}
+  .arena{gap:6px}
+  :root{--ch:clamp(46px,calc((100dvh - 262px - 36px) / 7),104px)}
+}
+
+/* v6: reponer / sacrificar */
+.btn.danger{background:var(--crimson);border-color:var(--crimson);color:#fff}
+.btn.danger:hover:not(:disabled){background:var(--crimson-d);border-color:var(--crimson-d)}
+.cell.v-repo{--ring:var(--cyan);border-color:var(--cyan);animation:ring 1.4s ease-out infinite}
+.cell.temple.o-p1.v-repo{background:var(--cyan-s)}
+.over-box.dlg{padding:26px 24px 20px;max-width:340px}
+.dlgwrap{z-index:70}
+.ctl-stats{gap:9px}
+
+/* v7: pantallas muy angostas (≤350 px): controles compactos para que no desborden */
+@media(max-width:350px){
+  .controls{gap:4px}
+  .controls .btn.sm{padding:8px 9px;font-size:11.5px;gap:4px}
+  .controls .btn .ic{font-size:13px}
+  .ctl-stats{gap:6px;font-size:10.5px;margin-left:0}
+  .ctl-stats .acts .ic{display:none}
+}
+
+/* v8: destello del mazo al reponer */
+.deck-chip.bump{animation:bump 1.3s ease-out;border-radius:8px}
+@keyframes bump{0%{background:var(--cyan-s);color:var(--cyan-d);transform:scale(1.25)}60%{background:var(--cyan-s)}100%{background:transparent;transform:none}}
+.pn-ai .deck-chip.bump{animation-name:bumpd}
+@keyframes bumpd{0%{background:#3A5A66;transform:scale(1.25)}60%{background:#3A5A66}100%{background:transparent;transform:none}}
+
+/* v9: título visible también en pantallas chicas */
+@media(max-width:700px){
+  .sel-intro{display:block;margin:0 0 2px}
+  .sel-intro h1{font-size:16px;line-height:1;margin:0}
+  .sel-intro p{display:none}
+  .sel-wrap{padding-top:0}
+}
+/* reglas reorganizadas */
+.rule-lead{background:var(--surface-2);border-radius:14px;padding:12px 14px;font-size:13.5px;color:var(--ink-2);margin-top:12px;line-height:1.5}
+.rule-lead b{color:var(--ink)}
+.rule-sec h3 .n{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--ink);color:#fff;font-size:10px;margin-right:7px;letter-spacing:0}
+.steps{margin:0;padding-left:20px;color:var(--ink-2);font-size:13.5px}
+.steps li{margin:4px 0}.steps b{color:var(--ink);font-weight:600}
+.acts-list{display:grid;gap:6px;margin-top:8px}
+.act-row{display:flex;gap:10px;align-items:flex-start;background:var(--surface-2);border-radius:12px;padding:9px 12px;font-size:13px;color:var(--ink-2)}
+.act-row .ic{font-size:18px;margin-top:1px;color:var(--ink);flex-shrink:0}
+.act-row b{color:var(--ink);font-weight:600}
+.rule-card{display:flex;gap:16px;align-items:center;margin-top:6px}
+.rule-card .cd{min-height:0}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:12.5px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend .badge{position:static;box-shadow:0 0 0 1px var(--line);width:20px;height:20px}
+
+/* objetivos resaltados sobre templos (el borde del templo es más específico) */
+.cell.temple.o-ai.vranged{border-color:var(--violet)}
+.cell.temple.o-ai.vattk-temple{border-color:var(--crimson)}
+/* selección en celular: nombre completo (sin recorte) y tipo + a quiénes vence en una sola fila */
+.cd-name,.cd-mid,.cd-sk{flex-shrink:0}
+.cd-name{line-height:1.2}
+.m-cell .cd-sk,.m-hand .cd-sk{flex-wrap:nowrap}
+@media(max-width:700px){
+  .m-full{padding:8px 2px 4px;gap:2px;justify-content:center}
+  .m-full .cd-art{width:28px;height:28px;font-size:16px}
+  .m-full .cd-sk{flex-wrap:nowrap}
+}
+}
+/* celular: la zona de detalle de la carta tiene alto fijo, así la grilla no cambia de tamaño al elegir cartas */
+@media(max-width:700px){.dock-info{height:68px;overflow:hidden;justify-content:flex-start}}
+/* dificultad y mazo automático */
+.sel-titlerow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px}
+.seg button{border:0;background:none;font:inherit;font-size:12.5px;font-weight:500;color:var(--ink-2);padding:6px 14px;border-radius:999px;cursor:pointer;transition:background .15s,color .15s}
+.seg button.on{background:var(--ink);color:#fff;font-weight:600}
+#btn-auto1 .ic{font-size:14px}
+@media(max-width:700px){
+  .sel-intro{display:block}
+  .sel-titlerow{flex-wrap:nowrap}
+  .seg button{font-size:11px;padding:4px 10px}
+  #btn-auto1{padding:6px 10px;font-size:12px}
+  .dock-count{display:none}   /* los 8 casilleros ya muestran cuántas llevás */
+}
+.dock-count{white-space:nowrap}
+@media(max-width:440px){#btn-auto1 .lbl{display:none}#btn-auto1{padding:7px 9px}.dock-slots{grid-template-columns:repeat(8,25px);gap:3px}.slot{width:25px;height:25px;border-radius:8px}.slot .ic{font-size:14px}.dock-cta{gap:6px}.dock-cta .btn.primary{padding:8px 14px}}
+@media(max-width:350px){.dock-slots{grid-template-columns:repeat(8,22px);gap:2px}.slot{width:22px;height:22px}.slot .ic{font-size:12px}.dock-cta .btn.primary{padding:8px 11px}}
+/* destellos: lo que cambia se destaca un momento */
+@keyframes flashglow{0%{transform:scale(1.5);color:var(--cyan-d);text-shadow:0 0 12px var(--cyan),0 0 4px var(--cyan)}60%{transform:scale(1.15);text-shadow:0 0 8px var(--cyan)}100%{transform:none;text-shadow:none}}
+@keyframes flashbg{0%{background-color:var(--cyan-s);box-shadow:0 0 0 4px var(--cyan-s)}100%{box-shadow:0 0 0 0 transparent}}
+@keyframes flashnew{0%{transform:translateY(-14px) scale(.9);opacity:0;box-shadow:0 0 0 0 var(--cyan)}50%{opacity:1;box-shadow:0 0 0 5px var(--cyan-s)}100%{transform:none;box-shadow:0 0 0 0 transparent}}
+.flash{display:inline-block;animation:flashglow .95s ease-out}
+.pn-ai .flash{color:#fff}
+.flash.flash-soft{animation:flashbg .9s ease-out;display:inherit}
+.tpl.flash{display:grid;animation:shake .4s ease-out,flashbg .9s ease-out;border-radius:10px}
+.turn-pill.flash{display:inline-block;animation:flashbg 1s ease-out,flashglow .7s ease-out}
+.hcard.flash-new{animation:flashnew .7s ease-out both}
+.btn:active,.fchip:active,.seg button:active{transform:scale(.96)}
+.cell.clickable:active{filter:brightness(.96)}
+.hcard:not(.hdim):active{transform:scale(.97)}
+/* tutorial */
+.sel-actions{display:flex;gap:8px}
+.tut-box{max-width:460px;padding:22px 22px 18px}
+.tut-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.tut-count{font-size:12px;font-weight:600;color:var(--ink-3);letter-spacing:.08em;text-transform:uppercase}
+.tut-scene{display:flex;justify-content:center;align-items:center;min-height:196px;margin:2px 0 14px}
+.tut-box h2{font-family:var(--display);font-size:20px;font-weight:600;margin-bottom:6px}
+.tut-box p{color:var(--ink-2);font-size:14px;line-height:1.5}
+.tut-box p b{color:var(--ink);font-weight:600}
+.tut-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px}
+.tut-dots{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;flex:1}
+.tut-dots i{width:6px;height:6px;border-radius:50%;background:var(--line-2);display:block;transition:all .2s}
+.tut-dots i.on{background:var(--ink);width:16px;border-radius:6px}
+.tut-board{--ch:64px;--cw:min(86px,calc((100vw - 120px)/3));display:grid;grid-template-columns:repeat(3,var(--cw));grid-auto-rows:var(--ch);gap:5px;padding:8px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh-1)}
+.tut-board{position:relative}
+.tut-board .cell .cd{pointer-events:none}
+.tut-card{display:flex;gap:18px;align-items:center}
+.tut-card .tc-l{display:grid;gap:6px;font-size:13px;color:var(--ink-2);text-align:left}
+.tut-card .tc-l b{color:var(--ink)}
+.tut-slots{display:grid;gap:12px;justify-items:center}
+.tut-slots .dock-slots{grid-template-columns:repeat(8,30px)}
+.tut-slots .slot{width:30px;height:30px}
+.tut-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.tut-chips .btn,.tut-chips .seg{pointer-events:none}
+.tut-pn{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 16px;box-shadow:var(--sh-1);font-size:13px;color:var(--ink-2)}
+.tut-pn .acts{font-size:13px}
+.tut-end{display:grid;gap:8px;justify-items:center;color:var(--ink-2);text-align:center}
+.tut-end .ic{font-size:44px;color:var(--cyan-d)}
+@media(max-width:700px){#btn-tut-sel .lbl{display:none}#btn-tut-sel{padding:7px 10px}.tut-box{padding:18px 16px 14px}.tut-scene{min-height:186px}}
+/* v10: encabezado centrado, título + dificultad + reglas en una línea, filtros más bajos, detalle flotante */
+.sel-top{justify-content:center}
+.brand-name{font-size:17px}.brand-mark{width:38px;height:38px}
+.sel-titlerow{flex-wrap:nowrap;gap:10px}
+.sel-titlerow h1{flex:1;white-space:nowrap}
+.tut-open{width:100%;justify-content:center;margin:4px 0 14px}
+@media(max-width:700px){
+  .sel-top{justify-content:center}.brand-name{font-size:14px}
+  .sel-titlerow h1{flex:0 0 auto}
+  .sel-titlerow .btn{flex-shrink:0}
+  .fchip{padding:3px 0 2px;gap:0;font-size:9.5px;border-radius:10px}
+  .fchip .ic{font-size:14px}
+  .sort-bar{gap:6px}
+  .dock{position:relative}
+  .dock-info{position:absolute;left:12px;right:12px;bottom:100%;margin-bottom:8px;height:auto;min-height:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh-2);padding:8px 12px;opacity:0;pointer-events:none;transition:opacity .15s;z-index:25;overflow:visible}
+  .dock-info.on{opacity:1}
+}
+@media(max-width:380px){#btn-rules-sel .lbl{display:none}#btn-rules-sel{padding:7px 10px}}
+@media(max-width:350px){.sel-titlerow{gap:6px}.sel-titlerow h1{font-size:14px}.seg button{padding:4px 7px;font-size:10.5px}#btn-rules-sel{padding:6px 8px}}
+/* v11: inicio */
+.sel-top{padding-bottom:8px}
+.brand{gap:9px}.brand-mark{width:30px;height:30px;border-radius:10px;background:var(--cs-b,#E8F0FE);color:#3F73D1;box-shadow:none}
+.brand-mark .ic{font-size:18px}.brand-name{font-size:15px}
+.sel-filterbar{display:flex;position:relative;margin:6px 0 4px}
+.sel-wrap{position:relative}
+#filter-btn{gap:6px}#filter-btn .ic{font-size:14px}
+.fbadge{display:none;place-items:center;min-width:16px;height:16px;border-radius:8px;background:var(--ink);color:#fff;font-size:10px;font-weight:700;padding:0 4px}
+.fpanel{display:none;position:absolute;z-index:30;left:0;width:min(560px,calc(100vw - 28px));top:calc(100% + 4px);margin:0;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh-2);padding:10px;gap:6px}
+.fpanel.open{display:flex;flex-direction:column}
+@media(min-width:701px){.sel-filterbar{margin:14px 0 6px}}
+/* v11: pantalla de juego apilada (logo · barra IA · tablero · barra tuya · mano) */
+.g2{min-height:100dvh;max-width:520px;margin:0 auto;padding:6px 10px calc(8px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px}
+.g2-logo{display:flex;align-items:center;justify-content:center;gap:6px;height:20px;font-family:var(--display);font-weight:600;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-3)}
+.g2-logo .ic{font-size:14px;color:#3F73D1}
+.g2-bar{position:relative;display:grid;grid-template-columns:30px minmax(0,1fr) auto 34px 34px;align-items:center;gap:6px;min-height:46px;padding:5px 8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh-1)}
+.g2-bar .g2-name{font-family:var(--display);font-weight:700;font-size:12px;letter-spacing:.04em}
+.g2-bar .g2-stats{display:flex;align-items:center;gap:7px;font-size:12.5px;white-space:nowrap}
+.g2-bar .g2-slot{width:34px;height:34px;display:grid;place-items:center}
+.g2-bar .g2-slot .btn{width:34px;height:34px;padding:0;display:grid;place-items:center;border-radius:50%}
+.g2-bar .g2-slot .btn .ic{font-size:17px}
+.g2-ai{background:#2A2D39;border-color:#2A2D39;color:#fff}
+.g2-ai .acts-txt,.g2-ai .deck-chip b{color:#fff}.g2-ai .deck-chip{color:#9AA0B4}
+.g2-ai .acts .ic{color:#4A4F61}.g2-ai .acts .ic.on{color:#E4E7F0;fill:#4A4F61}
+.g2-status{min-width:0;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:11.5px;line-height:1.25;color:var(--ink-2);background:none;border:0;padding:0;margin:0;min-height:0;overflow:hidden;text-align:left;font:inherit;font-size:11.5px}
+.g2-status .turn-pill{display:none}
+.g2-bar.g2-on{border-color:var(--cyan);box-shadow:0 0 0 2px var(--cyan-s),var(--sh-1)}
+.g2-ai.g2-on{border-color:var(--violet);box-shadow:0 0 0 2px var(--violet-s),var(--sh-1)}
+.g2-name.flash{display:inline-block}
+.g2-status>div{min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.g2-bar>*{order:0!important}.g2-bar .g2-status{margin:0!important;width:auto}
+.g2-board{flex:1 1 auto;display:flex;align-items:center;justify-content:center;min-height:0}
+.g2 .board{--ch:clamp(36px,calc((100dvh - 262px - 52px) / 7),92px);--cw:min(calc((100vw - 52px) / 3),calc(var(--ch) * 1.6))}
+.g2 .hand-box{margin:0}.g2 .hand-title{display:none}
+.g2 .hand-grid{display:flex;gap:6px}.g2 .hand-grid .hcard{flex:1 1 0;min-width:0}
+.g2 .menu{position:absolute;right:0;top:auto;bottom:calc(100% + 6px)}
+.g2 .log{display:none}.g2 .log.sheet{display:flex}
+@media(min-width:701px){.g2{padding-top:14px}}
+/* v12: botones redondos en el inicio */
+.sel-intro{position:relative}
+.btn.round{width:36px;height:36px;padding:0;border-radius:50%;display:grid;place-items:center;flex-shrink:0;position:relative}
+.btn.round .ic{font-size:17px}
+.fbadge{position:absolute;top:-3px;right:-3px;min-width:15px;height:15px;font-size:9px}
+.sel-intro .menu{position:absolute;right:0;top:calc(100% + 4px);z-index:35;gap:2px}
+.fpanel{top:calc(100% + 4px)}
+.g2-board{overflow:visible}
+/* v13: grilla de selección centrada; cartas de la mano con forma de carta */
+@media(max-width:700px){.cards-grid{align-content:safe center}}
+.g2 .hand-grid{justify-content:center}
+.g2 .hand-empty{flex:1;display:flex;align-items:center;justify-content:center;padding:0;box-sizing:border-box}
+.g2 .hand-grid .hcard{flex:0 0 calc((100% - 18px) / 4);max-width:calc((100% - 18px) / 4)}
+/* ── efectos gráficos ── */
+.board{position:relative}
+.fx-layer{position:absolute;inset:0;pointer-events:none;z-index:30}
+.fx-card{position:absolute;margin:0;box-shadow:var(--sh-2)}
+.fx-card.fx-win{border-color:var(--cyan)}.fx-card.fx-lose{border-color:var(--crimson)}.fx-card.fx-blast{border-color:var(--violet)}
+.fx-burst{position:absolute;display:grid;place-items:center;border-radius:50%;background:#fff;box-shadow:0 2px 10px rgba(30,35,60,.22);z-index:8;color:var(--ink-2)}
+.fx-burst .ic{stroke-width:2.2}
+.fx-burst.fx-win{color:var(--cyan-d);background:var(--cyan-s)}
+.fx-burst.fx-lose{color:var(--crimson-d);background:var(--crimson-s)}
+.fx-burst.fx-blast{color:var(--violet-d);background:var(--violet-s)}
+.fx-ring{position:absolute;border-radius:50%;border:2.5px solid var(--ink-3);z-index:7}
+.fx-ring.fx-win{border-color:var(--cyan)}.fx-ring.fx-lose{border-color:var(--crimson)}.fx-ring.fx-blast{border-color:var(--violet)}
+.fx-float{position:absolute;z-index:9;font-weight:700;font-size:18px;font-family:var(--display);text-shadow:0 1px 0 #fff,0 0 6px #fff}
+.fx-float.fx-win{color:var(--cyan-d)}.fx-float.fx-lose{color:var(--crimson-d)}
+.fx-shot{position:absolute;width:12px;height:12px;border-radius:50%;z-index:9;background:var(--ink-2);box-shadow:0 0 0 4px rgba(38,42,55,.12)}
+.fx-shot.fx-win{background:var(--cyan);box-shadow:0 0 0 4px var(--cyan-s)}.fx-shot.fx-lose{background:var(--crimson);box-shadow:0 0 0 4px var(--crimson-s)}
+.fx-aim{position:absolute;left:0;top:0;pointer-events:none;z-index:29;overflow:visible;animation:fade .15s ease-out}
+.fx-aim line{stroke:var(--crimson);stroke-width:3;stroke-dasharray:2 7;stroke-linecap:round;opacity:.8}
+.fx-aim circle{fill:none;stroke:var(--crimson);stroke-width:2.5}
+</style>
+<noscript><style>#sel1-screen{display:none!important}.nojs{display:grid;place-items:center;min-height:100vh;padding:24px;text-align:center;font:600 18px/1.4 system-ui,sans-serif;color:#262A37;background:#F2F4F9}</style></noscript>
+</head>
+<body>
+<noscript><div class="nojs">Abrí este archivo con un navegador (Chrome, Safari o la app Documents).</div></noscript>
+<div id="sel1-screen" class="screen active">
+  <header class="sel-top">
+    <div class="brand"><div class="brand-mark" id="brand-mark"></div><div class="brand-name">Spire Arena</div></div>
+  </header>
+  <div class="sel-wrap">
+    <div class="sel-intro">
+      <div class="sel-titlerow">
+        <h1>Elegí tu mazo</h1>
+        <div class="seg" id="diff-seg" role="radiogroup" aria-label="Dificultad"></div>
+        <button class="btn icon sm round" id="filter-btn" onclick="toggleFilterPanel()" aria-expanded="false" aria-label="Filtros" data-tip="Filtros"></button>
+        <button class="btn icon sm round" id="opt-btn" onclick="toggleHomeMenu()" aria-label="Opciones" data-tip="Opciones"></button>
+      </div>
+      <div class="menu" id="home-menu" style="display:none"></div>
+      <div class="sort-bar fpanel" id="sort-bar"></div>
+    </div>
+    <div class="cards-grid" id="grid1"></div>
+  </div>
+  <div class="dock"><div class="dock-in">
+    <div class="dock-row">
+      <div class="dock-slots" id="slots1"></div>
+      <div class="dock-cta">
+        <button class="btn sm" id="btn-auto1" onclick="autoPick()"></button>
+        <button class="btn primary" id="btn-confirm1" disabled onclick="confirmP1()">Jugar</button>
+      </div>
+    </div>
+  </div></div>
+</div>
+<div id="game-screen" class="screen"></div>
+<div id="tut-modal" class="modal"><div class="modal-box tut-box" id="tut-box"></div></div>
+<div id="rules-modal" class="modal" onclick="if(event.target===this)closeRules()"><div class="modal-box" id="rules-box"></div></div>
+<script>
+const TYPE_BEATS={water:['fire','metal'],fire:['metal','plant'],metal:['plant','earth'],plant:['earth','water'],earth:['water','fire']};
+const TYPE_EMOJI={water:'💧',fire:'🔥',metal:'🪨',plant:'🌱',earth:'🗻'};
+const CARDS=[
+  {id:1, name:'Maretazo',emoji:'🌊',type:'water',kw:['⬆️','⏫','↔️','⬇️'],desc:'Carga, flanquea y retrocede.'},
+  {id:2, name:'Torrente',emoji:'💦',type:'water',kw:['⬆️','⏫','🏹','⬇️','🤜'],desc:'Carga, dispara, retrocede y encadena.'},
+  {id:3, name:'Vórtice',emoji:'🌀',type:'water',kw:['⬆️','⏫','↔️'],desc:'Carga y flanquea.'},
+  {id:4, name:'Marea',emoji:'🌑',type:'water',kw:['⬆️','🏹','↔️','🤜','💣'],desc:'Dispara, flanquea, encadena y explota.'},
+  {id:5, name:'Volcán',emoji:'🌋',type:'fire',kw:['⬆️','⏫','💣'],desc:'Carga y explota.'},
+  {id:6, name:'Llamarada',emoji:'🌟',type:'fire',kw:['⬆️','⏫','🤜'],desc:'Carga y encadena.'},
+  {id:7, name:'Rescoldo',emoji:'🕯️',type:'fire',kw:['⬆️','⏫','🏹','💣'],desc:'Carga, dispara y explota.'},
+  {id:8, name:'Chispa',emoji:'✨',type:'fire',kw:['⬆️','🏹','↔️','⬇️','🤜'],desc:'Dispara, flanquea, retrocede y encadena.'},
+  {id:9, name:'Forja',emoji:'⚙️',type:'metal',kw:['⬆️','⏫','🏹','↔️'],desc:'Carga, dispara y flanquea.'},
+  {id:10, name:'Proyectil',emoji:'🔩',type:'metal',kw:['⬆️','🏹','⬇️','🤜','💣'],desc:'Dispara, retrocede, encadena y explota.'},
+  {id:11, name:'Émbolo',emoji:'🔧',type:'metal',kw:['⬆️','⏫','⬇️'],desc:'Carga y retrocede.'},
+  {id:12, name:'Escudo',emoji:'🛡️',type:'metal',kw:['⬆️','⏫','↔️','🤜'],desc:'Carga, flanquea y encadena.'},
+  {id:13, name:'Selva',emoji:'🌳',type:'plant',kw:['⬆️','⏫','🏹'],desc:'Carga y dispara.'},
+  {id:14, name:'Espiga',emoji:'🌾',type:'plant',kw:['⬆️','⏫','⬇️','💣'],desc:'Carga, retrocede y explota.'},
+  {id:15, name:'Zarza',emoji:'🌿',type:'plant',kw:['⬆️','↔️','⬇️','🤜','💣'],desc:'Flanquea, retrocede, encadena y explota.'},
+  {id:16, name:'Enredadera',emoji:'🌺',type:'plant',kw:['⬆️','⏫','🏹','⬇️'],desc:'Carga, dispara y retrocede.'},
+  {id:17, name:'Grieta',emoji:'〰️',type:'earth',kw:['⬆️','⏫','🏹','🤜'],desc:'Carga, dispara y encadena.'},
+  {id:18, name:'Alud',emoji:'⛰️',type:'earth',kw:['⬆️','⏫'],desc:'Carga.'},
+  {id:19, name:'Sedimento',emoji:'🏜️',type:'earth',kw:['⬆️','🏹','↔️','⬇️','💣'],desc:'Dispara, flanquea, retrocede y explota.'},
+  {id:20, name:'Zanja',emoji:'🕳️',type:'earth',kw:['⬆️','⏫','🤜','💣'],desc:'Carga, encadena y explota.'}
+]
+function hK(cd,k){const m={F:'⬆️',charge:'⏫',S:'↔️',B:'⬇️',ranged:'🏹',combo:'🤜',blast:'💣'};return cd.kw.includes(m[k]);}
+function typeBeats(cd){return(TYPE_BEATS[cd.type]||[]).map(t=>TYPE_EMOJI[t]).join('');}
+function typeInfo(cd){const b=typeBeats(cd);return TYPE_EMOJI[cd.type]+(b?' ☠️'+b:'');}
+function kwStrDisplay(cd){return cd.kw.filter(k=>k!=='⬆️').join(' ');}
+function kwStr(cd){return cd.kw.join(' ');}
+function dF(r){return r+1;} function dC(c){return c+1;} function pos(r,c){return 'F'+(r+1)+'C'+(c+1);}
+// ════ ICONS & CARD COMPONENTS ════
+const ICON_PATHS={
+  water:'<path d="M12 3.5c3.2 4 5.5 6.9 5.5 10a5.5 5.5 0 0 1-11 0c0-3.1 2.3-6 5.5-10z"/>',
+  fire:'<path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3.4 2.2-4.5.2 1.4.8 2.3 1.6 2.7C10.4 8.5 11 5.5 12 3z"/>',
+  metal:'<path d="M12 3l7.5 4.3v8.4L12 20l-7.5-4.3V7.3z"/><circle cx="12" cy="11.5" r="2.6"/>',
+  plant:'<path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14z"/><path d="M5 19c3-4 6-6.5 9-8"/>',
+  earth:'<path d="M3 19l6-10 3.5 5.5L15 11l6 8z"/>',
+  F:'<path d="M12 19V5M6 11l6-6 6 6"/>',
+  charge:'<path d="M6 12l6-6 6 6M6 19l6-6 6 6"/>',
+  S:'<path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4"/>',
+  B:'<path d="M12 5v14M6 13l6 6 6-6"/>',
+  ranged:'<circle cx="12" cy="12" r="5.5"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/>',
+  combo:'<circle cx="9" cy="12" r="5"/><circle cx="15" cy="12" r="5"/>',
+  blast:'<circle cx="12" cy="12" r="2.6"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/>',
+  spire:'<path d="M12 3l4.5 9H13l4 8H7l4-8H7.5z"/>',
+  temple:'<path d="M12 3l5 6.5V20H7V9.5z"/><path d="M10 20v-4.5a2 2 0 0 1 4 0V20"/>',
+  tower:'<path d="M12 2.5l3 3.5h4v4.5l2 2.5V20H3v-7l2-2.5V6h4z"/><path d="M10 20v-4a2 2 0 0 1 4 0v4"/>',
+  ruin:'<path d="M5 20l2-7 3.2 2L12 8l2.4 5L17 11l2 9z"/>',
+  bolt:'<path d="M13 3L5.5 13.5H11L10 21l7.5-10.5H12z"/>',
+  deck:'<rect x="7" y="6" width="11" height="14" rx="2.2"/><path d="M5 17V5.5A1.5 1.5 0 0 1 6.5 4H15"/>',
+  user:'<circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c.6-3.6 3.4-5.5 7-5.5s6.4 1.9 7 5.5"/>',
+  cpu:'<rect x="6" y="6" width="12" height="12" rx="2.5"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/>',
+  check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  x:'<path d="M6 6l12 12M18 6L6 18"/>',
+  tie:'<path d="M6 9h12M6 15h12"/>',
+  ban:'<circle cx="12" cy="12" r="8"/><path d="M6.3 6.3l11.4 11.4"/>',
+  help:'<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.5a2.5 2.5 0 1 1 3.6 2.2c-.8.5-1.2 1-1.2 1.8M12 16.6v.1"/>',
+  copy:'<rect x="8.5" y="8.5" width="11" height="11" rx="2.2"/><path d="M15.5 8.5V6.7a2.2 2.2 0 0 0-2.2-2.2H6.7a2.2 2.2 0 0 0-2.2 2.2v6.6a2.2 2.2 0 0 0 2.2 2.2h1.8"/>',
+  skip:'<path d="M6 6l8 6-8 6zM18 6v12"/>',
+  undo:'<path d="M9 8L4.5 12.5 9 17M5 12.5h9.5a5 5 0 0 1 0 10"/>',
+  refresh:'<path d="M20 11a8 8 0 0 0-14.4-4.3L4 9M4 4v5h5M4 13a8 8 0 0 0 14.4 4.3L20 15M20 20v-5h-5"/>',
+  trophy:'<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5v1.5A3 3 0 0 0 8 10.5M16 6h3v1.5a3 3 0 0 1-3 3M12 13v4M8.5 20h7M10 17h4"/>',
+  close:'<path d="M6 6l12 12M18 6L6 18"/>',
+  list:'<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>',
+  more:'<circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/>',
+  sound:'<path d="M4 10v4h3.5L12 18V6L7.5 10zM15.5 9a4 4 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11"/>',
+  mute:'<path d="M4 10v4h3.5L12 18V6L7.5 10zM16 9.5l5 5M21 9.5l-5 5"/>',
+  timer:'<circle cx="12" cy="13" r="7.5"/><path d="M12 9v4l2.5 2M9.5 3h5"/>',
+  trash:'<path d="M5 7h14M9 7V4.5h6V7M7 7l1 13h8l1-13M10.5 11v6M13.5 11v6"/>',
+  swords:'<path d="M19.5 4.5L8.5 15.5M4.5 4.5L15.5 15.5"/><path d="M6.5 13.5l4 4M17.5 13.5l-4 4"/><path d="M8.5 15.5L5 19M15.5 15.5L19 19"/>',
+  walk:'<path d="M5 12h14M14 7l5 5-5 5"/>'
+};
+function ic(n,cls){return '<svg class="ic'+(cls?' '+cls:'')+'" viewBox="0 0 24 24" aria-hidden="true">'+(ICON_PATHS[n]||'')+'</svg>';}
+const TYPE_NAME={water:'Agua',fire:'Fuego',metal:'Metal',plant:'Planta',earth:'Tierra'};
+const SKILLS=['charge','S','B','ranged','combo','blast'];
+const SKILL_NAME={charge:'Carga',S:'Flanquea',B:'Retrocede',ranged:'Disparo',combo:'Combo',blast:'Blast'};
+const SKILL_INFO={
+  charge:'Hasta 2 pasos por acción, cada uno en una dirección que permita la carta. El 1.º va a una celda libre; el 2.º, a una libre o contra un rival (carta o templo), sin combo.',
+  S:'Puede mover y atacar a los costados.',
+  B:'Puede mover y atacar hacia atrás (no a templos).',
+  ranged:'En vez de mover, dispara en línea recta, en las direcciones en que la carta puede moverse, a la 1.ª carta que encuentre. Solo se puede disparar a una carta rival cuyo tipo no venza al del tirador, y la mata. Ignora Blast y no daña templos. El tirador no se mueve ni corre riesgo. Las cartas propias, las ruinas y los templos tapan el tiro.',
+  combo:'Tras ganar un combate puede atacar otra carta o templo vecino, en las direcciones de la carta y sin gastar otra acción. Se repite mientras gane; termina si empata, pierde, hay Blast o golpea un templo.',
+  blast:'Todo combate cuerpo a cuerpo en que participe (atacando o defendiendo) manda a ambas cartas al descarte, sin mirar los tipos.'
+};
+const SKILL_TIP={charge:'Hasta 2 pasos por acción.',S:'Mueve y ataca de costado.',B:'Mueve y ataca hacia atrás.',ranged:'Mata a distancia sin moverse.',combo:'Tras ganar, ataca otra vez gratis.',blast:'Sus combates descartan a ambas cartas.'};
+function cardSkills(cd){return SKILLS.filter(k=>hK(cd,k));}
+function beatIcons(cd){return(TYPE_BEATS[cd.type]||[]).map(t=>'<span class="bt t-'+t+'" title="Vence a '+TYPE_NAME[t]+'">'+ic(t)+'</span>').join('');}
+// mode: full (selección) | hand | cell
+const esc=t=>String(t).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function cardHTML(cd,mode,dark){
+  const sk=cardSkills(cd);
+  const skH=sk.map(k=>mode==='full'
+    ?'<span class="sk-chip" data-tip="'+esc(SKILL_TIP[k])+'">'+ic(k)+'<span class="sk-l">'+SKILL_NAME[k]+'</span></span>'
+    :'<span data-tip="'+esc('<b>'+SKILL_NAME[k]+':</b> '+SKILL_TIP[k])+'">'+ic(k)+'</span>').join('');
+  const beats=(TYPE_BEATS[cd.type]||[]).map(t=>'<span class="bt t-'+t+'" data-tip="Vence a '+TYPE_NAME[t]+'">'+ic(t)+'</span>').join('');
+  return '<div class="cd m-'+mode+' t-'+cd.type+(dark?' dk':'')+'"><div class="cd-name">'+cd.name+'</div>'
+    +'<div class="cd-mid"><div class="cd-art" data-tip="'+TYPE_NAME[cd.type]+'">'+ic(cd.type)+'</div><div class="cd-beats"><span class="arr">'+ic('swords')+'</span>'+beats+'</div></div>'
+    +'<div class="cd-sk">'+skH+'</div></div>';
+}
+const G={phase:'sel1',p1sel:[],board:null,ruins:null,
+  p1:{hand:[],deck:[],actLeft:1,actMax:1},
+  ai:{hand:[],deck:[],actLeft:1,actMax:1},
+  cur:'p1',sel:null,validCells:[],rangedMode:false,_aiHL:null,
+  comboPending:null,log:[],winner:null,instC:0,aiThinking:false,aiStrat:'LATERAL',_aiFlash:null,aiMode:'v2'};
+
+function _kwScore(cd){let s=0;if(cd.kw.includes('🤜'))s+=6;if(cd.kw.includes('⏫'))s+=5;if(cd.kw.includes('↔️'))s+=4;if(cd.kw.includes('🏹'))s+=3;if(cd.kw.includes('💣'))s+=2;if(cd.kw.includes('⬇️'))s+=1;return s;}
+const TYPE_ORDER=['water','fire','metal','plant','earth'];
+let G_cardOrder=[...CARDS].sort((a,b)=>{const td=TYPE_ORDER.indexOf(a.type)-TYPE_ORDER.indexOf(b.type);return td!==0?td:_kwScore(b)-_kwScore(a);}).map(c=>c.id);
+let G_fType=new Set(),G_fSkill=new Set();
+function cardPasses(c){return(!G_fType.size||G_fType.has(c.type))&&[...G_fSkill].every(k=>hK(c,k));}
+function toggleHomeMenu(force){
+  const m=document.getElementById('home-menu'),on=force!==undefined?force:m.style.display==='none';
+  if(on){toggleFilterPanel(false);m.innerHTML='';
+    const it=(icn,label,fn)=>{const b=el('button','menu-item');b.innerHTML=ic(icn)+label;b.onclick=()=>{toggleHomeMenu(false);fn();};return b;};
+    m.appendChild(it('help','Reglas y tutorial',()=>openRules()));
+    m.appendChild(it(window._muted?'mute':'sound','Sonido',()=>{window._muted=!window._muted;try{localStorage.setItem('spire-mute',window._muted?'1':'');}catch(e){}}));}
+  m.style.display=on?'grid':'none';
+}
+document.addEventListener('click',e=>{const m=document.getElementById('home-menu');if(m&&m.style.display!=='none'&&!e.target.closest('#home-menu')&&!e.target.closest('#opt-btn'))toggleHomeMenu(false);});
+function toggleFilterPanel(force){const p=document.getElementById('sort-bar'),on=force!==undefined?force:!p.classList.contains('open');if(on)toggleHomeMenu(false);p.classList.toggle('open',on);document.getElementById('filter-btn').setAttribute('aria-expanded',String(on));}
+document.addEventListener('click',e=>{const p=document.getElementById('sort-bar');if(p&&p.classList.contains('open')&&!e.target.closest('#sort-bar')&&!e.target.closest('#filter-btn'))toggleFilterPanel(false);});
+function updateFilterBadge(){const n=G_fType.size+G_fSkill.size,b=document.getElementById('fbadge');if(b){b.textContent=n?String(n):'';b.style.display=n?'inline-grid':'none';}}
+function toggleFilter(kind,k){const st=kind==='type'?G_fType:G_fSkill;if(st.has(k))st.delete(k);else st.add(k);buildSelGrid();}
+function buildSortBar(){
+  const chip=(kind,k,tcls)=>'<button class="fchip'+(tcls?' t-'+k:'')+'" data-kind="'+kind+'" data-k="'+k+'" onclick="toggleFilter(\''+kind+'\',\''+k+'\')">'+ic(k)+'<span class="fl">'+(kind==='type'?TYPE_NAME[k]:SKILL_NAME[k])+'</span></button>';
+  document.getElementById('sort-bar').innerHTML=
+    '<div class="frow"><div class="fchips">'+['water','fire','metal','plant','earth'].map(t=>chip('type',t,1)).join('')+'</div></div>'
+   +'<div class="frow"><div class="fchips">'+SKILLS.map(k=>chip('skill',k,0)).join('')+'</div></div>';
+}
+function updateSelUI(){
+  const n=G.p1sel.length;
+  document.getElementById('btn-confirm1').disabled=n!==8;
+  const slots=document.getElementById('slots1');slots.innerHTML='';
+  for(let i=0;i<8;i++){
+    const card=CARDS.find(c=>c.id===G.p1sel[i]);
+    const s=el('div','slot'+(card?' full t-'+card.type:''));
+    if(card){s.innerHTML=ic(card.type);s.addEventListener('click',()=>toggleCard(card.id));}
+    slots.appendChild(s);
+  }
+}
+function toggleCard(id){
+  const i=G.p1sel.indexOf(id);
+  if(i>=0)G.p1sel.splice(i,1);else if(G.p1sel.length<8)G.p1sel.push(id);
+  buildSelGrid();
+}
+function buildSelGrid(){
+  const grid=document.getElementById('grid1');grid.innerHTML='';
+  document.querySelectorAll('#sort-bar .fchip').forEach(b=>b.classList.toggle('on',(b.dataset.kind==='type'?G_fType:G_fSkill).has(b.dataset.k)));updateFilterBadge();
+  const shown=G_cardOrder.map(id=>CARDS.find(c=>c.id===id)).filter(c=>c&&cardPasses(c));
+  if(!shown.length){const n=el('div','no-match');n.textContent='Ninguna carta coincide con los filtros.';grid.appendChild(n);}
+  shown.forEach(card=>{
+    const div=el('div','co t-'+card.type+(G.p1sel.includes(card.id)?' sel':''));
+    div.innerHTML=cardHTML(card,'full')+'<div class="co-check">'+ic('check')+'</div>';
+    div.addEventListener('click',()=>toggleCard(card.id));
+    grid.appendChild(div);
+  });
+  updateSelUI();
+}
+function openRules(){
+  const beats=['water','fire','metal','plant','earth'].map(t=>'<div class="beat-item t-'+t+'"><div class="bh">'+ic(t)+TYPE_NAME[t]+'</div>'+TYPE_BEATS[t].map(b=>'<div class="bl">'+ic('swords')+'<span>'+(BEAT_PHRASE[t][b][0].toUpperCase()+BEAT_PHRASE[t][b].slice(1))+'</span></div>').join('')+'</div>').join('');
+  const sk=SKILLS.map(k=>'<div class="sk-row">'+ic(k)+'<div><strong>'+SKILL_NAME[k]+'</strong><span>'+SKILL_INFO[k]+'</span></div></div>').join('');
+  const act=(icn,t,d)=>'<div class="act-row">'+ic(icn)+'<div><b>'+t+'.</b> '+d+'</div></div>';
+  let _n=0;const sec=(_x,h,body)=>'<div class="rule-sec"><h3><span class="n">'+(++_n)+'</span>'+h+'</h3>'+body+'</div>';
+  const demo=CARDS.find(c=>cardSkills(c).length>=2)||CARDS[0];
+  document.getElementById('rules-box').innerHTML=
+    '<div class="modal-head"><h2>Reglas</h2><button class="btn icon sm" onclick="closeRules()" aria-label="Cerrar">'+ic('close')+'</button></div>'
+    +'<button class="btn primary tut-open" onclick="closeRules();openTutorial()">'+ic('play')+'Ver el tutorial paso a paso</button>'
+    +sec(1,'Objetivo','<p>Destruí el templo <b>Central</b> rival (3 vidas) <b>o</b> sus dos templos <b>Chicos</b> (2 vidas cada uno). Perdés si eso les pasa a los tuyos, incluso por reponer.</p>')
+    +sec(2,'Preparación','<p>Elegí <b>8 de las 20 cartas</b>: se mezclan y robás 4. Empieza uno al azar. Tenés <b>1 acción</b> por turno.</p>')
+    +sec(3,'La carta','<div class="rule-card"><div class="t-'+demo.type+'" style="width:112px;flex:none">'+cardHTML(demo,'hand')+'</div><ul class="steps" style="list-style:none;padding:0"><li><b>Círculo:</b> su tipo.</li><li><b>Espadas:</b> los tipos a los que vence.</li><li><b>Íconos de abajo:</b> sus skills (sección 7).</li></ul></div>')
+    +sec(4,'Tu turno','<p>Gastá <b>todas</b> tus acciones, una por una. No se puede pasar: si solo te queda reponer, reponés; si no hay ninguna jugada posible, el turno termina solo. Al terminar robás hasta tener 4 cartas (mientras haya mazo).</p><div class="acts-list">'
+      +act('deck','Desplegar','una carta de tu mano a una celda de tu <b>fila de despliegue</b> (la pegada a tus templos), libre o con una carta rival, que se combate.')
+      +act('F','Mover o atacar','una carta tuya da 1 paso hacia el rival. Si ahí hay una carta rival, la atacás; si hay un templo rival, lo golpeás. No se entra a celdas con cartas propias ni ruinas.')
+      +act('ranged','Disparar','solo cartas con Disparo.')
+      +act('refresh','Reponer','el descarte se mezcla con el mazo, completás la mano a 4 al instante y un templo tuyo, a tu elección, pierde 1 vida.')
+      +'</div>')
+    +sec(5,'Combate','<p>Decide el <b>tipo</b>. El ganador queda en la celda del defensor y el perdedor va al <b>descarte</b>. Mismo tipo: empate, ambas al descarte (salvo Blast, sección 7).</p><div class="beat-list">'+beats+'</div>')
+    +sec(6,'Templos','<p>Cada golpe le saca <b>1 vida</b> y la carta que golpea va al descarte. Un templo sin vidas queda en <b>ruinas</b> y no se puede cruzar. Cada vez que un templo tuyo pierde una vida (golpe o reponer) ganás <b>+1 acción por turno</b>, desde tu próximo turno y para siempre.</p>')
+    +sec(7,'Skills','<div class="skill-list">'+sk+'</div>');
+  document.getElementById('rules-modal').classList.add('open');
+}
+// ════ TUTORIAL paso a paso ════
+const TUT={i:0,f:0,timer:null,steps:null};
+function tutTypeTable(){return['water','fire','metal','plant','earth'].map(t=>'<div class="beat-item t-'+t+'"><div class="bh">'+ic(t)+TYPE_NAME[t]+'</div>'+TYPE_BEATS[t].map(b=>'<div class="bl">'+ic('swords')+'<span>'+(BEAT_PHRASE[t][b][0].toUpperCase()+BEAT_PHRASE[t][b].slice(1))+'</span></div>').join('')+'</div>').join('');}
+function tutBoardHTML(specs,rows){
+  const b=el('div','tut-board');b._pos={};b.style.gridTemplateRows='repeat('+rows+',var(--ch))';
+  const cells=[];for(let r=0;r<rows;r++)for(let c=0;c<3;c++){const e=el('div','cell');b.appendChild(e);cells.push(e);}
+  const at=(r,c)=>cells[r*3+c];
+  for(const sp of specs){
+    const e=at(sp.r,sp.c);if(!e)continue;
+    if(sp.k==='card'){b._pos[sp.inst]=sp.r+','+sp.c;e.classList.add('c-'+sp.own,'t-'+sp.card.type);e.innerHTML=cardHTML(sp.card,'cell',sp.own==='ai');if(sp.pop)e.classList.add('enter');}
+    else if(sp.k==='tpl'){const big=sp.c===1;e.classList.add('temple','o-'+sp.own);let pips='';for(let i=0;i<(big?3:2);i++)pips+='<span class="pip'+(i<sp.hp?' on':'')+'"></span>';e.innerHTML='<div class="tpl'+(big?' big':'')+'">'+ic(big?'tower':'temple')+'<div class="pips">'+pips+'</div></div>';if(sp.hit)e.classList.add('hit');}
+    else if(sp.k==='ruin'){e.classList.add('is-ruin');e.innerHTML='<div class="ruin">'+ic('ruin')+'</div>';}
+    else if(sp.k==='hl')e.classList.add(sp.cls);
+  }
+  return b;
+}
+function tutSteps(){
+  if(TUT.steps)return TUT.steps;
+  const C=n=>CARDS.find(c=>c.name===n),has=(c,k)=>hK(c,k);
+  const water=C('Vórtice'),fire=C('Llamarada'),car=C('Alud'),sb=CARDS.find(c=>has(c,'S')&&has(c,'B')&&!has(c,'blast')&&!has(c,'ranged'))||C('Maretazo');
+  const rng=CARDS.find(c=>has(c,'ranged')&&!has(c,'blast')),cmb=CARDS.find(c=>has(c,'combo')&&!has(c,'blast')),bl=CARDS.find(c=>has(c,'blast'));
+  const e1=CARDS.find(c=>TYPE_BEATS[rng.type].includes(c.type)&&!has(c,'blast')),
+        ce=CARDS.filter(c=>TYPE_BEATS[cmb.type].includes(c.type)&&!has(c,'blast'));
+  const iid=(card,own)=>card.id*10+(own==='p1'?1:2),M=(card,own)=>({cd:card,owner:own,inst:iid(card,own)});
+  const P=(r,c,card,pop)=>({k:'card',r,c,card,own:'p1',pop,inst:iid(card,'p1')}),E=(r,c,card)=>({k:'card',r,c,card,own:'ai',inst:iid(card,'ai')});
+  const H=(r,c,cls)=>({k:'hl',r,c,cls});
+  const T=(own,hp,hit)=>[0,1,2].map(c=>({k:'tpl',own,r:own==='ai'?0:4,c,hp:hp[c],hit:hit===c}));
+  const base=(ai=[2,3,2],hit)=>[...T('ai',ai,hit),...T('p1',[2,3,2])];
+  const board=(frames,anim)=>({board:frames.map(f=>[...f]),rows:5,anim});
+  return TUT.steps=[
+    {t:'Objetivo',x:'Destruí el templo <b>Central</b> rival (3 vidas) <b>o</b> sus dos templos <b>Chicos</b> (2 vidas cada uno). Perdés si eso les pasa a los tuyos.',
+      scene:board([base(),[...base([2,0,2]),{k:'ruin',r:0,c:1}]])},
+    {t:'Elegí tu mazo',x:'Tocá <b>8 de las 20 cartas</b>, o usá <b>Auto</b> para un mazo bueno y distinto cada vez. Los filtros de tipo y skill ayudan a buscar. Arriba a la derecha elegís la <b>dificultad</b>.',custom:'deck'},
+    {t:'La carta',x:'Cada carta tiene un <b>tipo</b> (el círculo), los tipos a los que <b>vence</b> (las espadas) y sus <b>skills</b> (los íconos de abajo). Mantené apretada o pasá el mouse para ver detalles.',custom:'card'},
+    {t:'Tipos',x:'En un combate gana el tipo que vence al otro. <b>Mismo tipo: empate</b> y las dos cartas van al descarte.',custom:'types'},
+    {t:'Tu turno',x:'Tenés <b>acciones</b> por turno (empezás con 1). Cada jugada gasta una y el contador <b>destella</b>. No se puede pasar el turno. Al terminar robás hasta tener 4 cartas.',custom:'turn'},
+    {t:'Desplegar',x:'Tocá una carta de tu mano y después una celda marcada de tu <b>fila de despliegue</b>, la pegada a tus templos.',
+      scene:board([[...base(),H(3,0,'vmove'),H(3,1,'vmove'),H(3,2,'vmove')],[...base(),P(3,1,water,true)]])},
+    {t:'Avanzar',x:'Tocá una carta tuya del tablero y una celda marcada. Todas las cartas avanzan <b>1 paso</b> hacia el rival.',
+      scene:board([[...base(),P(3,1,water),H(2,1,'vmove')],[...base(),P(2,1,water)]],[null,()=>fxSlide(M(water,'p1'),3,1,2,1)])},
+    {t:'Atacar',x:'Si la celda marcada en rojo tiene un rival, lo atacás: <b>decide el tipo</b>. El ganador ocupa la celda y el perdedor va al descarte.',
+      scene:board([[...base(),P(2,1,water),E(1,1,fire),H(1,1,'vattk')],[...base(),P(1,1,water)]],[null,()=>fxClash('A',M(water,'p1'),M(fire,'ai'),2,1,1,1)])},
+    {t:'Skill: Carga',x:'La Carga da <b>hasta 2 pasos</b> por acción. El 1.º va a una celda libre; el 2.º, a una libre o a atacar (sin combo).',
+      scene:board([[...base(),P(3,1,car),H(2,1,'vmove'),H(1,1,'vmove')],[...base(),P(1,1,car)]],[null,()=>fxSlide(M(car,'p1'),3,1,1,1)])},
+    {t:'Skills: Flanquea y Retrocede',x:'<b>Flanquea</b> permite mover y atacar a los costados; <b>Retrocede</b>, hacia atrás (pero no a templos). Los pasos de cada carta son los que marca su skill.',
+      scene:board([[...base(),P(2,1,sb),H(1,1,'vmove'),H(2,0,'vmove'),H(2,2,'vmove'),H(3,1,'vmove')]])},
+    {t:'Skill: Disparo',x:'En vez de mover, <b>dispara en línea recta</b> a la primera carta que encuentre (en las direcciones en que la carta puede moverse). La mata salvo que su tipo venza al tuyo. <b>No daña templos</b>.',
+      scene:board([[...base(),P(3,1,rng),E(1,1,e1),H(1,1,'vranged')],[...base(),P(3,1,rng)]],[null,()=>{fx({k:'shot',fr:3,fc:1,tr:1,tc:1,tn:'win',dur:260});fx({k:'ghost',g:ghostOf(M(e1,'ai')),r:1,c:1,dieAt:260,tn:'win'});fx({k:'burst',r:1,c:1,icon:'ranged',tn:'win',at:260});}])},
+    {t:'Skill: Combo',x:'Tras ganar un combate, la carta puede <b>seguir atacando</b> a otra carta o templo vecino, sin gastar otra acción, mientras siga ganando.',
+      scene:board([[...base(),P(3,1,cmb),E(2,1,ce[0]),E(1,1,ce[ce.length-1]),H(2,1,'vattk')],[...base(),P(2,1,cmb),E(1,1,ce[ce.length-1]),H(1,1,'vattk')],[...base(),P(1,1,cmb)]],[null,()=>fxClash('A',M(cmb,'p1'),M(ce[0],'ai'),3,1,2,1),()=>fxClash('A',M(cmb,'p1'),M(ce[ce.length-1],'ai'),2,1,1,1)])},
+    {t:'Skill: Blast',x:'Si una carta con <b>Blast</b> participa en un combate cuerpo a cuerpo, <b>ambas cartas van al descarte</b>, sin mirar los tipos.',
+      scene:board([[...base(),P(3,1,bl),E(2,1,fire),H(2,1,'vattk')],[...base()]],[null,()=>fxClash('blast',M(bl,'p1'),M(fire,'ai'),3,1,2,1)])},
+    {t:'Atacar templos',x:'Atacar un templo le saca <b>1 vida</b> y tu carta va al descarte. Sin vidas queda en ruinas. Cada golpe a un templo te da, a su dueño, <b>+1 acción por turno</b> para siempre.',
+      scene:board([[...base(),P(1,1,water),H(0,1,'vattk-temple')],[...base([2,2,2],1)]],[null,()=>{const d=fxSlide(M(water,'p1'),1,1,0,1);fxSeq(d);fx({k:'burst',r:0,c:1,icon:'temple',tn:'win',at:0});fx({k:'float',r:0,c:1,text:'−1',tn:'win',at:120});}])},
+    {t:'Reponer',x:'Si te quedás sin cartas, <b>Reponer</b> (1 acción): el descarte vuelve al mazo, completás la mano a 4 y un templo tuyo, a tu elección, <b>pierde 1 vida</b>. Es obligatorio si no tenés otra jugada.',custom:'repo'},
+    {t:'¡A jugar!',x:'Ganás destruyendo templos. Probá <b>Fácil</b> para empezar y usá <b>Auto</b> para armar el mazo. Podés volver a ver este tutorial desde <b>Tutorial</b> o repasar las <b>Reglas</b>.',custom:'end'}
+  ];
+}
+function tutCustom(kind,f){
+  const d=el('div');
+  if(kind==='deck'){
+    const ids=G_cardOrder.slice(0,8),n=[0,2,5,8][f%4];
+    d.className='tut-slots';
+    d.innerHTML='<div class="tut-chips"><div class="seg"><button>Fácil</button><button class="on">Normal</button><button>Difícil</button></div><span class="btn sm">'+ic('refresh')+'Auto</span></div><div class="dock-slots">'+Array.from({length:8},(_,i)=>{const c=CARDS.find(x=>x.id===ids[i*2%ids.length]);return i<n?'<div class="slot full t-'+c.type+'">'+ic(c.type)+'</div>':'<div class="slot"></div>';}).join('')+'</div><div class="dock-count" style="display:block">'+n+' / 8</div>';
+  }else if(kind==='card'){
+    const c=CARDS.find(x=>hK(x,'charge')&&hK(x,'S'))||CARDS[0];d.className='tut-card';
+    d.innerHTML='<div class="t-'+c.type+'" style="width:118px;flex:none">'+cardHTML(c,'hand')+'</div><div class="tc-l"><span><b>Franja y borde:</b> su color</span><span><b>Círculo:</b> tipo</span><span><b>Espadas:</b> a quién vence</span><span><b>Íconos:</b> skills</span></div>';
+  }else if(kind==='types'){d.className='beat-list';d.style.width='100%';d.innerHTML=tutTypeTable();}
+  else if(kind==='turn'){
+    const max=2,left=[2,1,0][f%3];let bolts='';for(let i=0;i<max;i++)bolts+=ic('bolt',i<left?'on':'');
+    d.innerHTML='<div class="tut-pn"><span class="acts">'+bolts+'<span class="acts-txt'+(f%3?' flash':'')+'">'+left+'/'+max+'</span></span><span>'+(f%3===2?'Turno terminado: robás hasta 4':'Acciones disponibles')+'</span></div>';
+  }else if(kind==='repo'){
+    const after=f%2===1;
+    d.className='tut-slots';
+    d.innerHTML='<div class="tut-pn"><span class="deck-chip">'+ic('deck')+'<b'+(after?' class="flash"':'')+'>'+(after?1:0)+'</b></span><span class="deck-chip">'+ic('trash')+'<b'+(after?' class="flash"':'')+'>'+(after?0:5)+'</b></span><span>Mano: '+(after?4:0)+'</span></div><div class="tut-chips"><span class="btn sm'+(after?'':' primary')+'">'+ic('refresh')+'Reponer</span></div><div class="dock-slots" style="grid-template-columns:repeat(3,34px)"><div class="slot full t-water">'+ic('temple')+'</div><div class="slot full t-fire">'+ic('tower')+'</div><div class="slot'+(after?'':' full t-water')+'">'+(after?'':ic('temple'))+'</div></div>';
+  }else if(kind==='end'){d.className='tut-end';d.innerHTML=ic('trophy')+'<div>Destruí el templo Central o los dos Chicos.</div>';}
+  return d;
+}
+function tutRender(){
+  const steps=tutSteps(),st=steps[TUT.i],box=document.getElementById('tut-box');
+  clearTimeout(TUT.timer);TUT.f=0;
+  box.innerHTML='<div class="tut-top"><span class="tut-count">Paso '+(TUT.i+1)+' de '+steps.length+'</span><button class="btn icon sm" onclick="closeTutorial()" aria-label="Cerrar tutorial">'+ic('close')+'</button></div>'
+    +'<div class="tut-scene" id="tut-scene"></div><h2>'+st.t+'</h2><p>'+st.x+'</p>'
+    +'<div class="tut-nav"><button class="btn sm" id="tut-prev" onclick="tutGo(-1)"'+(TUT.i?'':' disabled')+'>'+ic('left')+'Anterior</button><div class="tut-dots">'+steps.map((_,i)=>'<i class="'+(i===TUT.i?'on':'')+'"></i>').join('')+'</div><button class="btn sm primary" onclick="'+(TUT.i===steps.length-1?'closeTutorial()':'tutGo(1)')+'">'+(TUT.i===steps.length-1?'Listo':'Siguiente'+ic('right'))+'</button></div>';
+  const paint=()=>{const sc=document.getElementById('tut-scene');if(!sc)return;sc.innerHTML='';
+    if(st.custom)sc.appendChild(tutCustom(st.custom,TUT.f));
+    else{const fr=st.scene.board,idx=TUT.f%fr.length,bd=tutBoardHTML(fr[idx],st.scene.rows);sc.appendChild(bd);
+      const a=st.scene.anim&&st.scene.anim[idx];
+      if(a){G._fx=[];G._fxT=0;a();playFx(bd,bd._pos);}}};
+  paint();
+  const n=st.custom==='deck'?4:st.custom==='turn'?3:st.custom==='repo'?2:(st.scene?st.scene.board.length:1);
+  const an=st.scene&&st.scene.anim,wait=()=>{const f=TUT.f%n,cur=an&&an[f],nxt=an&&an[(f+1)%n];return nxt?(cur?1500:700):(an?2200:1500);};
+  const tick=()=>{TUT.timer=setTimeout(()=>{TUT.f++;paint();tick();},wait());};
+  if(n>1)tick();
+}
+function tutGo(d){const n=tutSteps().length;TUT.i=Math.max(0,Math.min(n-1,TUT.i+d));tutRender();}
+function openTutorial(){TUT.i=0;tutRender();document.getElementById('tut-modal').classList.add('open');}
+function closeTutorial(){clearTimeout(TUT.timer);document.getElementById('tut-modal').classList.remove('open');}
+document.addEventListener('keydown',e=>{if(!document.getElementById('tut-modal').classList.contains('open'))return;if(e.key==='Escape')closeTutorial();else if(e.key==='ArrowRight')tutGo(1);else if(e.key==='ArrowLeft')tutGo(-1);});
+document.getElementById('tut-modal').addEventListener('click',e=>{if(e.target.id==='tut-modal')closeTutorial();});
+function closeRules(){document.getElementById('rules-modal').classList.remove('open');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeRules();});
+function confirmP1(){initGame();}
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function mkInst(cd,own){return{t:'card',cd:{...cd,kw:[...cd.kw]},owner:own,inst:++G.instC};}
+function initGame(){_flash=null;statusReset();
+  const bd=Array.from({length:7},()=>Array(3).fill(null));
+  bd[0][0]={t:'temple',owner:'ai',sz:'s',hp:2,maxHp:2}; bd[0][1]={t:'temple',owner:'ai',sz:'b',hp:3,maxHp:3}; bd[0][2]={t:'temple',owner:'ai',sz:'s',hp:2,maxHp:2};
+  bd[6][0]={t:'temple',owner:'p1',sz:'s',hp:2,maxHp:2}; bd[6][1]={t:'temple',owner:'p1',sz:'b',hp:3,maxHp:3}; bd[6][2]={t:'temple',owner:'p1',sz:'s',hp:2,maxHp:2};
+  G.board=bd; G.ruins=new Set();
+  const p1c=shuffle(G.p1sel.map(id=>mkInst(CARDS.find(c=>c.id===id),'p1')));
+  G.p1={hand:p1c.slice(0,4),deck:p1c.slice(4),discard:[],actLeft:1,actMax:1};
+  aiRollPersona();
+  const acd=aiPickDeck(); G.ai={hand:acd.slice(0,4),deck:acd.slice(4),discard:[],actLeft:1,actMax:1};
+  Object.assign(G,{cur:'p1',sel:null,validCells:[],rangedMode:false,comboPending:null,log:[],winner:null,aiThinking:false,aiStrat:'LATERAL',aiStratLocked:false,aiTurnNum:0,gameHistory:[],phase:'game',_aiHL:null,aiMode:'v2',_overOpen:true,mode:null,confirm:null,_lastHit:null});
+  const first=Math.random()<0.5?'p1':'ai';
+  G.cur=first; gP(first).actLeft=gP(first).actMax;
+  G.aiStratLocked=false; G.aiTurnNum=0; G.gameHistory=[];
+  showScreen('game-screen');
+  if(first==='ai'){log('🎲 Empieza la <b>IA</b>!');G.aiThinking=true;G._aiLoopCount=0;renderGame();aiStartCountdown();setTimeout(()=>aiTurn(),500);}
+  else{log('🎲 Empezás <b>vos</b>!');renderGame();}
+}
+// ════ DESCARTE, REPOSICIÓN Y SACRIFICIO ════
+function dc(p){return p.discard||(p.discard=[]);}
+function tRow(w){return w==='p1'?6:0;}
+// Reponer (1 acción): el templo elegido pierde 1 vida (y da la acción extra permanente de siempre); el descarte vuelve al mazo y la mano se completa a 4 al instante
+function payLife(who,col){
+  const p=gP(who),n=dc(p).length;
+  G._repo=true;hitTemple(tRow(who),col,null);G._repo=false;
+  if(G.phase==='over')return;
+  p.deck=shuffle(p.deck.concat(dc(p)));p.discard=[];
+  while(p.hand.length<4&&p.deck.length>0)p.hand.push(p.deck.shift());
+  log('🔁 '+(who==='p1'?'Reponés':'La IA repone')+' el mazo: las <b>'+n+'</b> cartas del descarte vuelven, la mano se completa a <b>'+p.hand.length+'</b> y quedan <b>'+p.deck.length+'</b> en el mazo.');
+}
+function hasCostlyAction(who){return genActions(simGet(),who).some(a=>a.type!=='end_turn');}
+function gP(who){return who==='p1'?G.p1:G.ai;}
+function fwd(who){return who==='p1'?-1:1;}
+function deployRow(who){return who==='p1'?5:1;}
+function opp(who){return who==='p1'?'ai':'p1';}
+// Cómo gana cada tipo (frases del juego)
+const BEAT_PHRASE={water:{fire:'apaga al Fuego',metal:'corroe al Metal'},fire:{metal:'derrite al Metal',plant:'quema a la Planta'},metal:{plant:'corta a la Planta',earth:'pulveriza a la Tierra'},plant:{earth:'se apodera de la Tierra',water:'absorbe el Agua'},earth:{water:'absorbe el Agua',fire:'apaga al Fuego'}};
+function beatLine(w,l){return TYPE_NAME[w]+' '+((BEAT_PHRASE[w]||{})[l]||'vence a '+TYPE_NAME[l]);}
+function cn(ci){return '<b>'+ci.cd.name+'</b> ('+TYPE_NAME[ci.cd.type]+')';}
+function blastNames(a,b){return[a,b].filter(x=>hK(x.cd,'blast')).map(x=>x.cd.name).join(' y ');}
+function comboNoTargets(w){log('🔥 <b>'+w.cd.name+'</b> tiene Combo pero no hay rivales ni templos pegados a él en sus direcciones: el combo termina.');}
+// ════ EFECTOS GRÁFICOS (se reproducen sobre el tablero después de cada render) ════
+function ghostOf(ci){return{html:cardHTML(ci.cd,'cell',ci.owner==='ai'),owner:ci.owner,type:ci.cd.type};}
+function tone(winnerOwner){return winnerOwner==='p1'?'win':'lose';}
+// t = tiempo (ms) donde ocurre cada paso dentro de la acción; se encadenan en combos
+function fx(o){if(G._sim)return;const T=G._fxT||0;o={...o,at:(o.at||0)+T};
+  if(o.k==='slide'){const m=G._slideEnd=G._slideEnd||{};if(m[o.inst]>o.at)o.at=m[o.inst];m[o.inst]=o.at+o.dur;}if(o.dieAt!=null)o.dieAt+=T;if(o.show!=null)o.show+=T;(G._fx=G._fx||[]).push(o);}
+function fxSeq(ms){G._fxT=(G._fxT||0)+ms;}
+// Carga con 2 pasos en diagonal: se anima en "L" (primero una celda y después la otra), pasando por una celda libre permitida
+function chargeVia(ci,fr,fc,tr,tc){
+  const dr=tr-fr,dc=tc-fc;if(Math.abs(dr)!==1||Math.abs(dc)!==1)return null;
+  const fd=fwd(ci.owner),ok=(r,c)=>inB(r,c)&&!isRuin(r,c)&&!G.board[r][c];
+  if(!((dr===fd||hK(ci.cd,'B'))&&hK(ci.cd,'S')))return null;
+  if(ok(fr+dr,fc))return{r:fr+dr,c:fc};      // primero vertical y después al costado
+  if(ok(fr,fc+dc))return{r:fr,c:fc+dc};      // o al revés si esa celda está ocupada
+  return null;
+}
+function fxSlide(ci,fr,fc,tr,tc){
+  const via=chargeVia(ci,fr,fc,tr,tc);
+  const dur=via?440:300;fx({k:'slide',inst:ci.inst,g:ghostOf(ci),fr,fc,tr,tc,via,dur});return dur;
+}
+function fxClash(res,mover,tgt,fr,fc,tr,tc){
+  // mover: carta que ataca (puede venir de la mano si fr<0); tgt: carta atacada, en (tr,tc)
+  const via=fr>=0?chargeVia(mover,fr,fc,tr,tc):null;
+  const dep=fr<0;                                   // se desplegó sobre un rival: la carta se ve caer un momento encima
+  const t0=dep?420:(via?440:300);
+  if(!dep)fxSlide(mover,fr,fc,tr,tc);else fx({k:'hold',inst:mover.inst,until:t0});
+  const kind=res==='A'?'win':res==='B'?'lose':res;                      // win | lose | blast | tie
+  const icon=kind==='blast'?'blast':kind==='tie'?'tie':'swords';
+  const tn=kind==='blast'?'blast':kind==='tie'?'none':tone(kind==='win'?mover.owner:tgt.owner);
+  fx({k:'ghost',g:ghostOf(tgt),r:tr,c:tc,dieAt:t0,tn});                      // el rival se ve hasta el golpe
+  if(dep)fx({k:'ghost',g:ghostOf(mover),r:tr,c:tc,show:0,dieAt:kind==='win'?t0:t0+90,tn,drop:true,fade:kind==='win'?60:null});
+  else if(kind!=='win')fx({k:'ghost',g:ghostOf(mover),r:tr,c:tc,show:t0,dieAt:t0+90,tn});   // el atacante llega y también cae
+  fx({k:'burst',r:tr,c:tc,icon,tn,at:t0});
+  fxSeq(t0+640);
+}
+// Lo que pasa se muestra en el estado, uno por vez, con un tiempo mínimo para leerlo; si se acumulan, cada uno dura menos
+const STQ={q:[],cur:null,last:'',timer:0};
+function shortEvt(msg){
+  let t=fmtLog(msg.replace(/<[^>]+>/g,'')).replace(/\s*\((Agua|Fuego|Metal|Planta|Tierra)\)/g,'');
+  if(/^Empate/.test(t))t='Empate: ambas cartas al descarte';
+  else t=t.split(/: |\. /)[0];
+  return t.length>70?t.slice(0,67)+'…':t;
+}
+function statusPush(msg,type){
+  if(type==='ai-logic'||type==='ai-error'||msg.indexOf('──')===0)return;
+  const t=shortEvt(msg);if(!t||t===STQ.cur||t===STQ.q[STQ.q.length-1])return;
+  STQ.q.push(t);if(STQ.q.length>8)STQ.q.shift();
+  if(!STQ.cur)statusNext();
+}
+function statusNext(){
+  clearTimeout(STQ.timer);
+  if(!STQ.q.length){STQ.cur=null;statusRefresh();return;}
+  STQ.cur=STQ.q.shift();STQ.last=STQ.cur;
+  const n=STQ.q.length;let d=Math.min(2300,1100+STQ.cur.length*18);
+  d*=n>=4?0.3:n>=2?0.55:n>=1?0.8:1;
+  statusRefresh();STQ.timer=setTimeout(statusNext,Math.max(350,d));
+}
+function statusRefresh(){const old=document.querySelector('.g2-status');if(old&&typeof g2Status==='function')old.replaceWith(g2Status());}
+function statusReset(){clearTimeout(STQ.timer);STQ.q=[];STQ.cur=null;STQ.last='';}
+function log(msg,type=''){
+  if(G._sim)return;G.log.unshift({msg,type});if(G.log.length>80)G.log.pop();
+  statusPush(msg,type);
+}
+function ghRecord(actor,action,detail){
+  if(G._sim)return;
+  G.gameHistory.push({turn:G.aiTurnNum,actor,action,detail,
+    p1hp:templesHPStr('p1'),aihp:templesHPStr('ai'),
+    p1act:G.p1.actMax,aiact:G.ai.actMax,
+    board:boardSnapshot()});
+}
+function templesHPStr(who){
+  const r=[];const tRow=who==='p1'?6:0;
+  for(let c=0;c<3;c++){const t=G.board[tRow][c];r.push(t?t.hp:0);}return r.join('/');
+}
+function boardSnapshot(){
+  const rows=[];
+  for(let r=0;r<7;r++){const cols=[];for(let c=0;c<3;c++){const ce=G.board[r][c];if(!ce)cols.push('.');else if(ce.t==='temple')cols.push((ce.owner==='p1'?'TP':'TA')+(ce.sz==='b'?'C':'S')+ce.hp);else cols.push((ce.owner==='p1'?'P':'A')+ce.cd.name.substring(0,4));}rows.push(cols.join('|'));}return rows.join(' // ');
+}
+function inB(r,c){return r>=0&&r<=6&&c>=0&&c<=2;}
+function isRuin(r,c){return G.ruins.has(r+','+c);}
+function el(tag,cls){const d=document.createElement(tag);if(cls)d.className=cls;return d;}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+// ════ SOUND SYSTEM ════
+const _AC=new(window.AudioContext||window.webkitAudioContext)();
+function _resume(){if(_AC.state==='suspended')_AC.resume();}
+function _tone(freq,type,vol,dur,fadeStart,pitchEnd){
+  if(G._sim||window._muted)return;
+  _resume();
+  const o=_AC.createOscillator(),g=_AC.createGain();
+  o.connect(g);g.connect(_AC.destination);
+  o.type=type||'sine';o.frequency.setValueAtTime(freq,_AC.currentTime);
+  if(pitchEnd)o.frequency.exponentialRampToValueAtTime(pitchEnd,_AC.currentTime+dur);
+  g.gain.setValueAtTime(vol||0.18,_AC.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,_AC.currentTime+(fadeStart||dur));
+  o.start();o.stop(_AC.currentTime+dur);
+}
+function _noise(vol,dur,type){
+  if(G._sim||window._muted)return;
+  _resume();
+  const buf=_AC.createBuffer(1,_AC.sampleRate*dur,_AC.sampleRate);
+  const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1);
+  const src=_AC.createBufferSource(),g=_AC.createGain(),f=_AC.createBiquadFilter();
+  f.type=type||'bandpass';f.frequency.value=600;f.Q.value=0.8;
+  src.buffer=buf;src.connect(f);f.connect(g);g.connect(_AC.destination);
+  g.gain.setValueAtTime(vol||0.15,_AC.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,_AC.currentTime+dur);
+  src.start();src.stop(_AC.currentTime+dur);
+}
+const SFX={
+  move:   ()=>{_tone(520,'sine',0.07,0.08,0.05);},
+  deploy: ()=>{_tone(300,'triangle',0.15,0.15,0.10);_tone(200,'triangle',0.10,0.15,0.10);},
+  kill:   ()=>{_noise(0.18,0.12,'highpass');_tone(180,'sawtooth',0.12,0.18,0.12,80);},
+  ranged: ()=>{_tone(1200,'sawtooth',0.08,0.06,0.04,400);_noise(0.10,0.09,'highpass');},
+  blast:  ()=>{_noise(0.3,0.35,'lowpass');_tone(80,'sawtooth',0.25,0.35,0.30,40);},
+  tie:    ()=>{_tone(300,'square',0.10,0.12,0.08);_tone(280,'square',0.10,0.14,0.09);},
+  temple: ()=>{_tone(120,'sawtooth',0.22,0.40,0.35,60);_noise(0.15,0.20,'bandpass');},
+  templeDestroy:()=>{_noise(0.4,0.55,'lowpass');_tone(60,'sawtooth',0.30,0.55,0.50,30);},
+  combo:  ()=>{_tone(660,'sine',0.12,0.08,0.06);setTimeout(()=>_tone(880,'sine',0.12,0.08,0.06),80);},
+  select: ()=>{_tone(700,'sine',0.06,0.06,0.04);},
+  endTurn:()=>{_tone(400,'sine',0.08,0.12,0.10,350);},
+  winGame:()=>{[0,0.1,0.2,0.35].forEach((t,i)=>{setTimeout(()=>_tone([523,659,784,1046][i],'sine',0.18,0.4,0.35),t*1000);});},
+  loseGame:()=>{_tone(400,'sine',0.15,0.6,0.55,200);},
+  charge: ()=>{_tone(600,'sawtooth',0.10,0.10,0.07,300);},
+};
+
+function validMoveCells(r,c,who){
+  const cell=G.board[r][c]; if(!cell||cell.t!=='card')return[];
+  const fd=fwd(who),isCharge=hK(cell.cd,'charge'),res=new Map();
+  function add(tr,tc,vt){const k=tr+','+tc;if(!res.has(k)||(vt==='attk'&&res.get(k).vt==='move'))res.set(k,{r:tr,c:tc,vt});}
+  const dirs=[[fd,0]];if(hK(cell.cd,'S'))dirs.push([0,-1],[0,1]);if(hK(cell.cd,'B'))dirs.push([-fd,0]);
+  for(const[dr,dc]of dirs){
+    const tr=r+dr,tc=c+dc;if(!inB(tr,tc)||isRuin(tr,tc))continue;
+    const t=G.board[tr][tc];
+    if(!t){
+      add(tr,tc,'move');
+      // Carga: un 2.º paso por acción, en cualquier dirección que permita la carta; si ahí hay un rival lo ataca (sin combo)
+      if(isCharge)for(const[er,ec]of dirs){
+        const xr=tr+er,xc=tc+ec;if(!inB(xr,xc)||isRuin(xr,xc)||(xr===r&&xc===c))continue;
+        const x=G.board[xr][xc];
+        if(!x)add(xr,xc,'move');
+        else if(x.t==='card'&&x.owner!==who)add(xr,xc,'attk');
+        else if(x.t==='temple'&&x.owner!==who&&x.hp>0&&!(er===-fd&&ec===0))add(xr,xc,'attk');
+      }
+    }
+    else if(t.t==='card'&&t.owner!==who)add(tr,tc,'attk');
+    else if(t.t==='temple'&&t.owner!==who&&t.hp>0&&!(dr===-fd&&dc===0))add(tr,tc,'attk');
+  }
+  return[...res.values()];
+}
+function validRangedCells(r,c,who){
+  const cell=G.board[r][c];if(!cell||cell.t!=='card'||!hK(cell.cd,'ranged'))return[];
+  const fd=fwd(who),res=[];
+  // en línea recta, sin límite de alcance, solo en las direcciones en que la carta puede moverse
+  // (adelante siempre; costados con Flanquea; atrás con Retrocede): la 1ª carta rival, solo si puede matarla. No dispara a templos.
+  const dirs=[[fd,0]];if(hK(cell.cd,'S'))dirs.push([0,-1],[0,1]);if(hK(cell.cd,'B'))dirs.push([-fd,0]);
+  for(const[dr,dc]of dirs){
+    for(let d=1;d<=6;d++){
+      const tr=r+dr*d,tc=c+dc*d;if(!inB(tr,tc)||isRuin(tr,tc))break;
+      const tgt=G.board[tr][tc];
+      if(tgt){if(tgt.t==='card'&&tgt.owner!==who&&resolveRanged(cell,tgt)==='kill')res.push({r:tr,c:tc,vt:'ranged'});break;}
+    }
+  }
+  return res;
+}
+function validDeployCells(who){
+  const dr=deployRow(who),res=[];
+  for(let c=0;c<3;c++){if(isRuin(dr,c))continue;const t=G.board[dr][c];if(!t)res.push({r:dr,c,vt:'move'});else if(t.t==='card'&&t.owner!==who)res.push({r:dr,c,vt:'deploy-combat'});}
+  return res;
+}
+function playChargeSound(){SFX.charge();}
+function resolveCombat(A,B){
+  // Blast keyword: both die regardless of type
+  if(hK(A.cd,'blast')||hK(B.cd,'blast'))return'blast';
+  const ta=A.cd.type,tb=B.cd.type;
+  const aWins=(TYPE_BEATS[ta]||[]).includes(tb);
+  const bWins=(TYPE_BEATS[tb]||[]).includes(ta);
+  if(aWins&&!bWins)return'A';
+  if(bWins&&!aWins)return'B';
+  return'tie'; // same type or mutual neutrality
+}
+// Ranged: same as melee but (a) blast ignored, (b) shooter never dies.
+// If shooter's type beats target OR tie → target dies (kill). If target would win → noeffect.
+function resolveRanged(shooter,target){
+  const ts=shooter.cd.type,tt=target.cd.type;
+  const targetWins=(TYPE_BEATS[tt]||[]).includes(ts)&&!(TYPE_BEATS[ts]||[]).includes(tt);
+  return targetWins?'noeffect':'kill';
+}
+function previewCombat(A,B){const r=resolveCombat(A,B);return r==='A'?'win':r==='B'?'lose':r;}
+function toDeck(ci){dc(gP(ci.owner)).push(ci);}
+function checkWin(){
+  for(const who of['p1','ai']){
+    const enemy=opp(who);let sAlive=0,bAlive=0;
+    for(let r=0;r<7;r++)for(let c=0;c<3;c++){const ce=G.board[r][c];if(ce&&ce.t==='temple'&&ce.owner===enemy){if(ce.sz==='s'&&ce.hp>0)sAlive++;if(ce.sz==='b'&&ce.hp>0)bAlive++;}}
+    if(bAlive===0||sAlive===0){G.winner=who;G.phase='over';if(!G._sim)setTimeout(()=>who==='p1'?SFX.winGame():SFX.loseGame(),200);return;}
+  }
+}
+function hitTemple(tr,tc,attacker){
+  G._lastHit=G._repo?'pago':'ataque';
+  const tpl=G.board[tr][tc];if(!tpl||tpl.t!=='temple')return;
+  tpl.hp--;const own=gP(tpl.owner);
+  fx({k:'burst',r:tr,c:tc,icon:'temple',tn:tpl.owner==='p1'?'lose':'win',at:0});fx({k:'float',r:tr,c:tc,text:'−1',tn:tpl.owner==='p1'?'lose':'win',at:120});fxSeq(500);
+  const sz=tpl.sz==='b'?'Central':'Chico',mine=tpl.owner==='p1',ownerS=mine?'tuyo':'de la IA';
+  if(G._repo){
+    log('💥 '+(mine?'Pagás':'La IA paga')+' 1 vida del templo '+sz+' para reponer: '+(tpl.hp<=0?'<b>queda destruido</b>':'queda '+tpl.hp+'/'+tpl.maxHp)+'.');
+    if(tpl.hp<=0)SFX.templeDestroy();else SFX.temple();
+  }else{
+    const by=attacker?cn(attacker)+' golpea':'Golpe a';
+    log(tpl.hp<=0?'💥 ¡'+by+' el templo '+sz+' '+ownerS+' y lo <b>DESTRUYE</b>!':'💥 '+by+' el templo '+sz+' '+ownerS+': pierde 1 vida (queda '+tpl.hp+'/'+tpl.maxHp+').'+(attacker?' <b>'+attacker.cd.name+'</b> va al descarte.':''));
+    if(tpl.hp<=0)SFX.templeDestroy();else SFX.temple();
+  }
+  if(tpl.hp<=0){G.board[tr][tc]=null;G.ruins.add(tr+','+tc);}
+  own.actMax++;
+  log('⚡ '+(mine?'Ganás':'La IA gana')+' +1 acción permanente: ahora '+(mine?'tenés':'tiene')+' '+own.actMax+' por turno.');
+  if(attacker)toDeck(attacker);checkWin();
+}
+// Returns array of all valid combo targets in every direction this card can move
+function findComboTargets(winner,wr,wc){
+  if(!hK(winner.cd,'combo')||G.board[wr][wc]!==winner)return[];
+  const fd=fwd(winner.owner);
+  const dirs=[];
+  if(hK(winner.cd,'F')||hK(winner.cd,'charge'))dirs.push([fd,0]);   // forward
+  if(hK(winner.cd,'S'))dirs.push([0,-1],[0,1]);                     // sideways
+  if(hK(winner.cd,'B'))dirs.push([-fd,0]);                          // backward
+  const targets=[];
+  for(const[dr,dc]of dirs){
+    const nr=wr+dr,nc=wc+dc;
+    if(!inB(nr,nc)||isRuin(nr,nc))continue;
+    const next=G.board[nr][nc];if(!next)continue;
+    if(next.t==='card'&&next.owner!==winner.owner){
+      const prev=previewCombat(winner,next);
+      targets.push({targetR:nr,targetC:nc,isTemple:false,dr,dc,preview:prev});
+    }else if(next.t==='temple'&&next.owner!==winner.owner&&next.hp>0){
+      targets.push({targetR:nr,targetC:nc,isTemple:true,dr,dc,preview:'temple'});
+    }
+  }
+  return targets;
+}
+function executeCombo(winner,wr,wc,targetR,targetC,isTemple){
+  const target=G.board[targetR][targetC];if(!target)return;
+  const tname=isTemple?'el templo '+(target.sz==='b'?'Central':'Chico'):cn(target);
+  log('🔥 <b>Combo</b>: '+cn(winner)+' sigue contra '+tname+'.');SFX.combo();
+  if(isTemple){fxSeq(fxSlide(winner,wr,wc,targetR,targetC));G.board[wr][wc]=null;hitTemple(targetR,targetC,winner);log('🔥 El combo termina: golpear un templo lo cierra.');}
+  else{
+    const res=resolveCombat(winner,target);fxClash(res,winner,target,wr,wc,targetR,targetC);
+    if(res==='A'){
+      log('✅ Combo: '+cn(winner)+' eliminó a '+cn(target)+' ('+beatLine(winner.cd.type,target.cd.type)+'). <b>'+target.cd.name+'</b> va al descarte.');
+      toDeck(target);
+      G.board[targetR][targetC]=winner; // winner advances into target's cell
+      G.board[wr][wc]=null;
+    }
+    else if(res==='B'){log('🛡️ Combo cortado: '+cn(target)+' resistió ('+beatLine(target.cd.type,winner.cd.type)+'). <b>'+winner.cd.name+'</b> va al descarte y el combo termina.');toDeck(winner);G.board[wr][wc]=null;}
+    else if(res==='blast')log('💥 Combo cortado por el Blast de <b>'+blastNames(winner,target)+'</b>: '+cn(winner)+' y '+cn(target)+' van al descarte y el combo termina.');
+    else log('💨 Combo cortado por empate (ambas de tipo '+TYPE_NAME[winner.cd.type]+'): van al descarte y el combo termina.');
+    if(res==='blast'||res==='tie'){toDeck(winner);toDeck(target);G.board[wr][wc]=null;G.board[targetR][targetC]=null;}
+  }
+}
+function applyMelee(mover,tgt,fr,fc,tr,tc){
+  const res=resolveCombat(mover,tgt);fxClash(res,mover,tgt,fr,fc,tr,tc);
+  if(res==='A'){log('⚔️ '+cn(mover)+' venció a '+cn(tgt)+': '+beatLine(mover.cd.type,tgt.cd.type)+'. <b>'+tgt.cd.name+'</b> va al descarte.');toDeck(tgt);G.board[tr][tc]=mover;if(fr>=0)G.board[fr][fc]=null;SFX.kill();return'win';}
+  else if(res==='B'){log('🛡️ '+cn(tgt)+' resistió a '+cn(mover)+': '+beatLine(tgt.cd.type,mover.cd.type)+'. <b>'+mover.cd.name+'</b> va al descarte.');toDeck(mover);if(fr>=0)G.board[fr][fc]=null;SFX.kill();return'lose';}
+  else{
+    if(res==='blast')log('💥 Blast de <b>'+blastNames(mover,tgt)+'</b>: '+cn(mover)+' y '+cn(tgt)+' van al descarte (el Blast ignora los tipos).');
+    else log('💨 Empate: ambas son de tipo '+TYPE_NAME[mover.cd.type]+'. <b>'+mover.cd.name+'</b> y <b>'+tgt.cd.name+'</b> van al descarte.');
+    toDeck(mover);toDeck(tgt);if(fr>=0)G.board[fr][fc]=null;G.board[tr][tc]=null;if(res==='blast')SFX.blast();else SFX.tie();return'both';}
+}
+function doMove(fr,fc,tr,tc,who){
+  who=who||G.cur;const mover=G.board[fr][fc];if(!mover)return'ok';
+  const tgt=G.board[tr][tc];
+  if(!tgt){fxSlide(mover,fr,fc,tr,tc);G.board[tr][tc]=mover;G.board[fr][fc]=null;log('🚶 <b>'+mover.cd.name+'</b> '+pos(fr,fc)+'→'+pos(tr,tc)+'.');SFX.move();
+    if(who==='p1')ghRecord('P1','move',mover.cd.name+' '+pos(fr,fc)+'→'+pos(tr,tc));
+    return'ok';}
+  else if(tgt.t==='card'){
+    const outcome=applyMelee(mover,tgt,fr,fc,tr,tc);
+    const step2=Math.abs(tr-fr)+Math.abs(tc-fc)>1;   // ataque de Carga a 2 pasos: no hace combo
+    if(outcome==='win'&&who==='p1'&&!step2){const cts=findComboTargets(mover,tr,tc);if(cts.length){G.comboPending={winner:mover,wr:tr,wc:tc,targets:cts};return'combo';}else if(hK(mover.cd,'combo'))comboNoTargets(mover);}
+    return outcome;
+  }else if(tgt.t==='temple'){fxSeq(fxSlide(mover,fr,fc,tr,tc));G.board[fr][fc]=null;hitTemple(tr,tc,mover);return'ok';}
+  return'ok';
+}
+function doDeploy(handIdx,r,c,who){
+  const p=gP(who),ci=p.hand[handIdx];if(!ci)return'fail';
+  const tgt=G.board[r][c];
+  if(tgt&&tgt.t==='card'&&tgt.owner!==who){
+    p.hand.splice(handIdx,1);log('👊 <b>'+ci.cd.name+'</b> baja sobre <b>'+tgt.cd.name+'</b> en '+pos(r,c)+'!');
+    const outcome=applyMelee(ci,tgt,-1,-1,r,c);
+    if(outcome==='win'&&who==='p1'){const cts=findComboTargets(ci,r,c);if(cts.length){G.comboPending={winner:ci,wr:r,wc:c,targets:cts};return'combo';}else if(hK(ci.cd,'combo'))comboNoTargets(ci);}
+    return'normal';
+  }
+  if(tgt)return'fail';
+  G.board[r][c]=ci;p.hand.splice(handIdx,1);
+  log('🃏 '+(who==='p1'?'Bajás':'IA baja')+' <b>'+ci.cd.name+'</b> en '+pos(r,c)+'.');SFX.deploy();
+  return'normal';
+}
+function doRanged(fr,fc,tr,tc){
+  const src=G.board[fr][fc],tgt=G.board[tr][tc];if(!src||!tgt||tgt.owner===src.owner)return;
+  if(tgt.t==='temple'){fx({k:'shot',fr,fc,tr,tc,tn:tone(src.owner),dur:260});fxSeq(260);SFX.ranged();log('🎯 '+cn(src)+' dispara al templo '+(tgt.sz==='b'?'Central':'Chico')+' '+(tgt.owner==='p1'?'tuyo':'de la IA')+' y se gasta.');G.board[fr][fc]=null;hitTemple(tr,tc,src);return;}
+  if(tgt.t!=='card')return;
+  const res=resolveRanged(src,tgt);
+  fx({k:'shot',fr,fc,tr,tc,tn:tone(src.owner),dur:260});
+  if(res==='kill'){
+    fx({k:'ghost',g:ghostOf(tgt),r:tr,c:tc,dieAt:260,tn:tone(src.owner)});fx({k:'burst',r:tr,c:tc,icon:'ranged',tn:tone(src.owner),at:260});fxSeq(560);
+    log('🎯 '+cn(src)+' eliminó a '+cn(tgt)+' a distancia ('+(src.cd.type===tgt.cd.type?'mismo tipo':beatLine(src.cd.type,tgt.cd.type))+'). <b>'+tgt.cd.name+'</b> va al descarte.');
+    toDeck(tgt);G.board[tr][tc]=null;SFX.ranged();
+  }else{
+    fx({k:'burst',r:tr,c:tc,icon:'ban',tn:'none',at:260});fxSeq(560);
+    log('🎯 '+cn(src)+' no puede dañar a '+cn(tgt)+': '+beatLine(tgt.cd.type,src.cd.type)+', así que el disparo no tiene efecto.');
+  }
+}
+function consumeAction(who){
+  gP(who).actLeft--;G.sel=null;G.validCells=[];G.rangedMode=false;G.comboPending=null;
+  if(G.phase==='over'){renderGame();return;}
+  if(gP(who).actLeft<=0)doEndTurn();else if(who==='p1'&&!hasCostlyAction('p1')){log('Sin jugadas posibles: termina tu turno.');doEndTurn();}else renderGame();
+}
+function drawCards(who){
+  const p=gP(who);
+  while(p.hand.length<4&&p.deck.length>0)p.hand.push(p.deck.shift());
+}
+function doEndTurn(){
+  drawCards(G.cur);
+  if(G.phase==='over'){G.aiThinking=false;G.sel=null;G.validCells=[];renderGame();return;}
+  G.mode=null;G.confirm=null;G.cur=opp(G.cur);gP(G.cur).actLeft=gP(G.cur).actMax;
+  G.sel=null;G.validCells=[];G.rangedMode=false;G.comboPending=null;
+  if(G.cur==='ai'){log('── <b>Turno IA</b> ──');G.aiThinking=true;G._aiLoopCount=0;renderGame();aiStartCountdown();setTimeout(()=>aiTurn(),300);}
+  else{log('── <b>Tu turno</b> ──');renderGame();if(!G._sim&&!G._auto&&!hasCostlyAction('p1')){log('Sin jugadas posibles: termina tu turno.');setTimeout(()=>{if(G.cur==='p1'&&G.phase!=='over')doEndTurn();},700);}}
+}
+function clickCell(r,c){
+  if(G.phase==='over'||G.cur!=='p1'||G.aiThinking)return;
+  if(G.confirm)return;
+  if(G.mode){
+    const ce=G.board[r][c];
+    if(ce&&ce.t==='temple'&&ce.owner==='p1'&&ce.hp>0){G.confirm={type:'repo',col:c};renderGame();}
+    return;
+  }
+  // COMBO MODE: click target cell to attack, click elsewhere to cancel
+  if(G.comboPending){
+    const tgtIdx=G.comboPending.targets.findIndex(t=>t.targetR===r&&t.targetC===c);
+    if(tgtIdx>=0)playerComboYes(tgtIdx);
+    else{log('↩️ Combo cancelado.');G.comboPending=null;consumeAction('p1');}
+    return;
+  }
+  if(G.sel){
+    const vc=G.validCells.find(v=>v.r===r&&v.c===c);
+    if(vc){
+      if(G.sel.from==='hand'){const res=doDeploy(G.sel.idx,r,c,'p1');if(res==='combo'){G.sel=null;G.rangedMode=false;renderGame();return;}consumeAction('p1');}
+      else{let res='ok';if(vc.vt==='ranged')doRanged(G.sel.r,G.sel.c,r,c);else res=doMove(G.sel.r,G.sel.c,r,c,'p1');if(res==='combo'){G.sel=null;G.rangedMode=false;renderGame();return;}consumeAction('p1');}
+      return;
+    }
+    const nc=G.board[r][c];if(nc&&nc.t==='card'&&nc.owner==='p1'&&!(G.sel.from==='board'&&G.sel.r===r&&G.sel.c===c)){selectBoardCard(r,c);return;}
+    clearSel();return;
+  }
+  const cell=G.board[r][c];if(cell&&cell.t==='card'&&cell.owner==='p1')selectBoardCard(r,c);
+}
+function playerComboYes(targetIdx){
+  if(!G.comboPending)return;
+  const{winner,wr,wc,targets}=G.comboPending;
+  const{targetR,targetC,isTemple}=targets[targetIdx];
+  G.comboPending=null;
+  executeCombo(winner,wr,wc,targetR,targetC,isTemple);checkWin();
+  if(G.phase==='over'){renderGame();return;}
+  // After a card kill winner advanced to (targetR,targetC) — look for new combo targets there
+  if(!isTemple&&G.board[targetR]&&G.board[targetR][targetC]===winner){
+    const newTargets=findComboTargets(winner,targetR,targetC);
+    if(newTargets.length){G.comboPending={winner,wr:targetR,wc:targetC,targets:newTargets};renderGame();return;}
+    comboNoTargets(winner);
+  }
+  consumeAction('p1');
+}
+function playerComboSkip(){if(!G.comboPending)return;log('↩️ Combo cancelado.');G.comboPending=null;consumeAction('p1');}
+function selectBoardCard(r,c){G.sel={from:'board',r,c};G.rangedMode=false;G.validCells=[...validMoveCells(r,c,'p1'),...validRangedCells(r,c,'p1')];SFX.select();renderGame();}
+function toggleRangedMode(){G.rangedMode=!G.rangedMode;if(G.sel&&G.sel.from==='board')G.validCells=G.rangedMode?validRangedCells(G.sel.r,G.sel.c,'p1'):[...validMoveCells(G.sel.r,G.sel.c,'p1'),...validRangedCells(G.sel.r,G.sel.c,'p1')];renderGame();}
+function clickHandCard(i){if(G.phase==='over'||G.cur!=='p1'||G.aiThinking||G.comboPending||G.mode||G.confirm)return;const ci=G.p1.hand[i];if(!ci)return;G.sel={from:'hand',idx:i};G.rangedMode=false;G.validCells=validDeployCells('p1');SFX.select();renderGame();}
+function clearSel(){G.sel=null;G.validCells=[];G.rangedMode=false;renderGame();}
+
+// ════ AI MODULE ════
+// ════ PERSONALIDADES OCULTAS ════
+// Cada partida la IA toma una personalidad al azar (el jugador no la ve). Dentro de ella varía levemente sus pesos,
+// su sesgo de tipo en el mazo y, en cada turno, su estilo; además explora jugadas alternativas parecidas.
+const PERSONAS={"agresiva":{"ai":{"actVal":8.25,"card":2.61,"hand":0.17,"adv":11.99,"lane":24.26,"deployRisk":0.12,"tpScale":1982.63,"cycle":1.7,"explore":0.19},"deck":{"charge":5.92,"ranged":2.45,"S":2.54,"combo":0.42,"blast":0,"B":0.91,"noise":3.07}},"defensiva":{"ai":{"actVal":33,"card":6.6,"hand":1.55,"adv":4.44,"lane":11.71,"deployRisk":11.88,"tpScale":498.77,"cycle":8.5,"explore":0.08},"deck":{"charge":6.7,"ranged":2.11,"S":2.82,"combo":1.67,"blast":1.5,"B":1.02,"noise":1.74}},"equilibrada":{"ai":{"actVal":73.1,"card":1.1,"hand":1,"adv":12.62,"lane":11.6,"deployRisk":0.43,"tpScale":825,"cycle":5.1,"explore":0.06},"deck":{"charge":8.29,"ranged":0.78,"S":2.9,"combo":3.55,"blast":0.83,"B":0.08,"noise":1}},"artillera":{"ai":{"actVal":20.08,"card":4.4,"hand":1.15,"adv":6.24,"lane":12.01,"deployRisk":4.65,"tpScale":994.89,"cycle":1.96,"explore":0.11},"deck":{"charge":6.54,"ranged":2.43,"S":2.07,"combo":0.52,"blast":0.62,"B":2.34,"noise":2.4}},"temeraria":{"ai":{"actVal":12.21,"card":1.7,"hand":0.61,"adv":14,"lane":35.34,"deployRisk":0.15,"tpScale":1418.27,"cycle":0.27,"explore":0.28},"deck":{"charge":7.9,"ranged":1.88,"S":1.58,"combo":1.57,"blast":2.77,"B":2,"noise":3.78}},"cautelosa":{"ai":{"actVal":56.09,"card":6.63,"hand":2.4,"adv":4.43,"lane":3.3,"deployRisk":15.01,"tpScale":657.05,"cycle":9.72,"explore":0.05},"deck":{"charge":4.61,"ranged":2.38,"S":1.92,"combo":2.28,"blast":0,"B":1.48,"noise":1.97}}};
+// Dificultad: cuánto busca la IA, cuánto se equivoca a propósito y qué tan bueno es su mazo
+const DIFF_PRESETS={
+  easy:{beam:2,depth:2,budgetMs:120,explore:0.45,exploreTol:400,noise:8},
+  normal:{beam:12,depth:3,budgetMs:400,explore:0.2,exploreTol:80,second:true},
+  hard:{beam:24,depth:5,budgetMs:1200,explore:0,exploreTol:80,noise:0,persona:'equilibrada'}
+};
+const DIFF_NAME={easy:'Fácil',normal:'Normal',hard:'Difícil'};
+G.difficulty='normal';
+try{const d=localStorage.getItem('spire-diff');if(DIFF_PRESETS[d])G.difficulty=d;}catch(e){}
+function setDifficulty(d){if(!DIFF_PRESETS[d])return;G.difficulty=d;try{localStorage.setItem('spire-diff',d);}catch(e){}buildDiffSeg();}
+function buildDiffSeg(){
+  const seg=document.getElementById('diff-seg');if(!seg)return;seg.innerHTML='';
+  for(const d of['easy','normal','hard']){const b=el('button',G.difficulty===d?'on':'');b.textContent=DIFF_NAME[d];b.setAttribute('role','radio');b.setAttribute('aria-checked',String(G.difficulty===d));b.onclick=()=>setDifficulty(d);seg.appendChild(b);}
+}
+function applyDifficulty(){
+  const d=DIFF_PRESETS[G.difficulty]||DIFF_PRESETS.normal;
+  AI2.beam=d.beam;AI2.depth=d.depth;AI2.budgetMs=d.budgetMs;AI2.exploreTol=d.exploreTol;AI2.second=!!d.second;
+  if(d.explore!=null)AI2.explore=d.explore;
+  if(d.noise!=null&&G.aiPersona)G.aiPersona.deck.noise=d.noise;
+}
+// Mazo automático: bueno (prioriza las skills que más valen) pero distinto cada vez (azar en los tipos y en el desempate)
+function autoDeckIds(){
+  const w={charge:7,S:2,combo:2,blast:1,ranged:1,B:1,noise:6.5};
+  const tt=['water','fire','metal','plant','earth'];
+  w['t_'+tt[Math.floor(Math.random()*5)]]=2+Math.random()*2;
+  w['t_'+tt[Math.floor(Math.random()*5)]]=1+Math.random()*2;
+  return aiPickIds(w);
+}
+function autoPick(){G.p1sel=autoDeckIds();buildSelGrid();updateSelUI();SFX.select();}
+function aiRollPersona(){
+  const keys=Object.keys(PERSONAS),fixed=(DIFF_PRESETS[G.difficulty]||{}).persona,k=PERSONAS[fixed]?fixed:keys[Math.floor(Math.random()*keys.length)],P=PERSONAS[k],ai={},deck={};
+  for(const x in P.ai)ai[x]=x==='explore'?Math.max(0,P.ai[x]+(Math.random()-.5)*0.06):P.ai[x]*(1+(Math.random()-.5)*0.3);
+  for(const x in P.deck)deck[x]=Math.max(0,P.deck[x]+(Math.random()-.5)*(x==='noise'?1:2));
+  const tt=['water','fire','metal','plant','earth'];deck['t_'+tt[Math.floor(Math.random()*5)]]=2+Math.random()*2;
+  G.aiPersona={key:k,ai,deck};G.aiBase={...ai};Object.assign(AI2,ai);applyDifficulty();
+}
+function aiMood(){const b=G.aiBase;if(!b)return;for(const x of['adv','lane','actVal'])AI2[x]=b[x]*(0.8+Math.random()*0.45);}
+// Pesos de la elección de mazo de la IA (evolucionables con tools/evolve.js)
+const AI_DECK={combo:2,charge:7,S:2,ranged:1,blast:1,B:1,noise:2.5};
+function aiPickIds(w){
+  // La IA arma su mazo con criterio propio, sin mirar qué eligió el jugador:
+  // valora las skills, garantiza al menos 1 carta de cada tipo y agrega algo de azar para variar.
+  w=w||AI_DECK;
+  const kw=cd=>{let s=w['t_'+cd.type]||0;for(const k of['combo','charge','S','ranged','blast','B'])if(hK(cd,k))s+=w[k];return s;};
+  const scored=CARDS.map(cd=>({cd,score:kw(cd)+Math.random()*w.noise})).sort((a,b)=>b.score-a.score);
+  const picked=[];
+  for(const tp of['water','fire','metal','plant','earth']){
+    const best=scored.find(s=>s.cd.type===tp&&!picked.includes(s.cd.id));
+    if(best)picked.push(best.cd.id);
+  }
+  for(const s of scored){if(picked.length>=8)break;if(!picked.includes(s.cd.id))picked.push(s.cd.id);}
+  return picked.slice(0,8);
+}
+function aiPickDeck(){return shuffle(aiPickIds(G.aiPersona?G.aiPersona.deck:AI_DECK).map(id=>mkInst(CARDS.find(c=>c.id===id),'ai')));}
+function getP1UpcomingTypes(peekDepth){
+  // Full-state read of what's coming: current hand (always visible) + next N cards
+  // in the deck queue (deterministic order once revealed — this IS the out-cycle read).
+  const types=[];
+  for(const ci of G.p1.hand)types.push(ci.cd.type);
+  for(let i=0;i<Math.min(peekDepth||3,G.p1.deck.length);i++)types.push(G.p1.deck[i].cd.type);
+  return types;
+}
+function getCards(who){const r=[];for(let row=0;row<7;row++)for(let col=0;col<3;col++){const ce=G.board[row][col];if(ce&&ce.t==='card'&&ce.owner===who)r.push({ci:ce,r:row,c:col});}return r;}
+function getTemples(who){const r=[];for(let row=0;row<7;row++)for(let col=0;col<3;col++){const ce=G.board[row][col];if(ce&&ce.t==='temple'&&ce.owner===who&&ce.hp>0)r.push({tpl:ce,r:row,c:col});}return r;}
+function columnClear(r,c,who){
+  const fd=fwd(who),enemy=opp(who);
+  for(let d=1;d<=6;d++){const nr=r+fd*d;if(!inB(nr,c)||isRuin(nr,c))break;const ce=G.board[nr][c];if(!ce)continue;if(ce.t==='temple'&&ce.owner===enemy)return true;return false;}
+  return false;
+}
+function aiEvalStrategy(){
+  G.aiTurnNum++;
+  const p1Cards=getCards('p1');
+
+  // ── DEFEND: always overrides everything ──
+  // 1. Immediate adjacency
+  for(const{ci,r,c}of p1Cards){
+    const ahead=r-1;
+    if(ahead>=0&&G.board[ahead][c]&&G.board[ahead][c].t==='temple'&&G.board[ahead][c].owner==='ai'){
+      G.aiStrat='DEFEND';G.aiStratLocked=false;
+      return'Defensa urgente: rival adyacente a mi templo en '+pos(r,c);
+    }
+  }
+  // 2. Clear-path threat ≤2 effective moves (charge halves distance)
+  for(const{ci,r,c}of p1Cards){
+    const aiTemple=G.board[0][c];
+    if(!aiTemple||aiTemple.t!=='temple'||aiTemple.owner!=='ai'||aiTemple.hp<=0)continue;
+    let blocked=false;
+    for(let nr=r-1;nr>=1;nr--){const ce=G.board[nr][c];if(ce&&ce.t==='card'&&ce.owner==='ai'){blocked=true;break;}}
+    if(blocked)continue;
+    const movesNeeded=hK(ci.cd,'charge')?Math.ceil(r/2):r;
+    if(movesNeeded<=2){
+      G.aiStrat='DEFEND';G.aiStratLocked=false;
+      return'Defensa preventiva: '+ci.cd.name+(hK(ci.cd,'charge')?'⚡':'')+' llega a mi templo C'+dC(c)+' en ~'+movesNeeded+' movs sin bloqueador';
+    }
+  }
+  if(G.aiStrat==='DEFEND'){G.aiStratLocked=false;}
+
+  // ── WINNING BLOW: lock in and finish ──
+  const enemyTemples=getTemples('p1');
+  const centralTpl=enemyTemples.find(t=>t.tpl.sz==='b');
+  // Central at 1HP → override everything, lock CENTRAL, route ALL cards there
+  if(centralTpl&&centralTpl.tpl.hp===1){
+    G.aiStrat='CENTRAL';G.aiStratLocked=true;
+    return'¡GOLPE FINAL al central! Bloqueado CENTRAL — todo a C2';
+  }
+  const smallTemples=enemyTemples.filter(t=>t.tpl.sz==='s');
+  for(const{tpl,r,c}of smallTemples){
+    if(tpl.hp===1){
+      const otherAlive=smallTemples.filter(t=>t.c!==c&&t.tpl.hp>0).length;
+      if(otherAlive===0){
+        G.aiStrat='LATERAL';G.aiStratLocked=true;
+        return'¡GOLPE FINAL al último chico C'+dC(c)+'! Bloqueado LATERAL';
+      }
+    }
+  }
+
+  // ── Strategy already locked: enforce it strictly ──
+  if(G.aiStratLocked){
+    return'Estrategia bloqueada: '+G.aiStrat+' (sin cambios)';
+  }
+
+  // ── First-turn strategy selection (or post-defend re-evaluation) ──
+  const p1Bonus=G.p1.actMax-1;
+
+  // If we already gave away 2+ actions from central, NEVER go central again
+  if(p1Bonus>=2&&G.aiStrat==='CENTRAL'){
+    G.aiStrat='LATERAL';G.aiStratLocked=true;
+    return'Lateral bloqueado: ya di '+p1Bonus+' acciones extra al rival por el central, no insisto';
+  }
+
+  // Si ya empezaste una ruta, terminala
+  const smallsHurt=smallTemples.filter(t=>t.tpl.hp<t.tpl.maxHp).length;
+  if(smallsHurt>0){
+    G.aiStrat='LATERAL';G.aiStratLocked=true;
+    return'Lateral bloqueado: ya dañé '+smallsHurt+' templo(s) chico(s) — commitear la ruta';
+  }
+  // Si ya dañaste el central, no la abandonés
+  if(centralTpl&&centralTpl.tpl.hp<centralTpl.tpl.maxHp){
+    G.aiStrat='CENTRAL';G.aiStratLocked=true;
+    return'Central bloqueado: ya dañé el central — commitear la ruta';
+  }
+
+  // Measure lateral column blockage vs central path
+  let lateralScore=0,centralScore=0;
+  function cardVal(ci){return 2+(hK(ci.cd,'combo')?3:0)+(hK(ci.cd,'charge')?2:0)+(hK(ci.cd,'ranged')?1:0);}
+  // Central: do I have strong cards in col 1?
+  const myCards=getCards('ai');
+  for(const{ci,r,c}of myCards){
+    if(c===1&&r>=2)centralScore+=cardVal(ci);
+    if((c===0||c===2)&&r>=2)lateralScore+=cardVal(ci);
+  }
+  // Penalize central if it would empower rival
+  centralScore-=p1Bonus*15;
+  // Check column openness: any P1 card blocks a lateral column
+  let col0blocked=false,col2blocked=false;
+  for(let r=2;r<=5;r++){
+    const ce0=G.board[r][0],ce2=G.board[r][2];
+    if(ce0&&ce0.t==='card'&&ce0.owner==='p1')col0blocked=true;
+    if(ce2&&ce2.t==='card'&&ce2.owner==='p1')col2blocked=true;
+  }
+  if(!col0blocked)lateralScore+=20;
+  if(!col2blocked)lateralScore+=20;
+  if(col0blocked&&col2blocked)centralScore+=15;
+
+  // Out-cycle: does my hand answer well against what the rival is about to draw/play?
+  const upcoming=getP1UpcomingTypes(3);
+  if(upcoming.length){
+    let handCounterScore=0;
+    for(const ci of G.ai.hand){
+      let adv=0;for(const t of upcoming){if((TYPE_BEATS[ci.cd.type]||[]).includes(t))adv++;if((TYPE_BEATS[t]||[]).includes(ci.cd.type))adv--;}
+      handCounterScore+=adv;
+    }
+    if(handCounterScore>=2)centralScore+=10;      // well-armed: push the shorter, decisive route
+    else if(handCounterScore<=-2)lateralScore+=10; // weak answers: hedge by splitting pressure
+  }
+
+  if(lateralScore>=centralScore){
+    G.aiStrat='LATERAL';G.aiStratLocked=true;
+    return'Lateral bloqueado: score lateral='+lateralScore+' vs central='+centralScore;
+  }else{
+    G.aiStrat='CENTRAL';G.aiStratLocked=true;
+    return'Central bloqueado: score central='+centralScore+' vs lateral='+lateralScore;
+  }
+}
+// Returns {col, urgency('CRITICAL'|'HIGH'|'MEDIUM'), movesNeeded, msg} for the most urgent threat,
+// or null if no threat. Considers clear-path (no AI blocker) + card mobility.
+function detectPlayerThreat(){
+  const p1Cards=getCards('p1');
+  const threats=[];
+  for(const{ci,r,c}of p1Cards){
+    // Only care about columns where I have a temple
+    const aiTemple=G.board[0][c];
+    if(!aiTemple||aiTemple.t!=='temple'||aiTemple.owner!=='ai'||aiTemple.hp<=0)continue;
+    // Check if there's an AI blocker between this P1 card and row 0
+    let blocked=false;
+    for(let nr=r-1;nr>=1;nr--){
+      const ce=G.board[nr][c];
+      if(ce&&ce.t==='card'&&ce.owner==='ai'){blocked=true;break;}
+    }
+    if(blocked)continue;
+    // Distance to temple (row 1 is adjacent to row 0 temple)
+    const dist=r; // rows 1..6, temple is row 0
+    // Effective moves needed
+    const isCharge=hK(ci.cd,'charge');
+    const movesNeeded=isCharge?Math.ceil(dist/2):dist;
+    const urgency=movesNeeded<=1?'CRITICAL':movesNeeded<=2?'HIGH':'MEDIUM';
+    if(movesNeeded<=4){
+      threats.push({col:c,urgency,dist,movesNeeded,
+        msg:'Rival '+ci.cd.name+(isCharge?'⚡':'')+' a '+dist+' casillas de mi templo C'+dC(c)+' (camino libre, ~'+movesNeeded+' movs)'});
+    }
+  }
+  if(!threats.length)return null;
+  // Return most urgent (fewest moves needed, prefer critical cols)
+  threats.sort((a,b)=>a.movesNeeded-b.movesNeeded||(a.col===1?-1:1));
+  return threats[0];
+}
+function aiScoreAction(action){
+  let score=0;
+  const strat=G.aiStrat;
+
+  switch(action.type){
+    case'attack_temple':{
+      const tpl=G.board[action.tr][action.tc];if(!tpl)break;
+      const isCentral=tpl.sz==='b';
+
+      // ── Winning blow: always top priority regardless of strategy ──
+      if(tpl.hp===1){
+        if(isCentral){score+=300;break;}
+        const otherSmall=getTemples('p1').filter(t=>t.tpl.sz==='s'&&t.c!==action.tc&&t.tpl.hp>0).length;
+        if(otherSmall===0){score+=300;break;}
+        // Not last small but hurts
+        if(strat==='LATERAL')score+=100;
+        else score+=20; // off-strategy partial hit
+        break;
+      }
+
+      // ── Non-killing temple hits: disciplina estricta de estrategia ──
+      if(isCentral){
+        if(strat==='CENTRAL'){
+          score+=60;
+          if(tpl.hp===2)score+=20; // siguiente hit gana
+          // Penalizar si ya le dimos demasiadas acciones al rival
+          score-=G.p1.actMax*12;
+          if(G.p1.actMax>=3)score-=40;
+        }else{
+          // OFF-STRATEGY: golpear el central jugando LATERAL = regalarle acciones al rival sin avanzar
+          score-=180;
+        }
+      }else{
+        // Small temple
+        if(strat==='LATERAL'){
+          // Golpe parcial: solo vale si tenemos follow-up en esa columna
+          const myCardsInCol=getCards('ai').filter(({c})=>c===action.tc).length;
+          score+=60+myCardsInCol*15;
+          // Penalizar por la acción extra que le damos al rival
+          score-=G.p1.actMax*10;
+          // Sin follow-up garantizado, golpe parcial es riesgoso
+          if(myCardsInCol===0)score-=60;
+          else if(myCardsInCol===1&&tpl.hp>1)score-=40;
+        }else if(strat==='CENTRAL'){
+          // OFF-STRATEGY: golpear chicos jugando CENTRAL = mezclar rutas = darle acciones gratis
+          score-=180;
+        }else{
+          score+=30; // DEFEND: cualquier daño es ok
+        }
+      }
+      break;
+    }
+    case'attack':{
+      const tgt=G.board[action.tr][action.tc],atk=G.board[action.fr][action.fc];if(!tgt||!atk)break;
+      if(action.result==='win'){
+        score+=40;
+        if(columnClear(action.tr,action.tc,'ai'))score+=50;
+        // Combo chain into temple?
+        if(hK(atk.cd,'combo')){const cts=findComboTargets(atk,action.tr,action.tc);if(cts&&cts.length){score+=cts.find(ct=>ct.isTemple)?80:28;}}
+        // On-strategy column bonus
+        const onStratCol=(strat==='CENTRAL'&&action.tc===1)||(strat==='LATERAL'&&action.tc!==1)||(strat==='DEFEND');
+        if(onStratCol)score+=25;else score-=10; // fuera de ruta pero al menos reduce presión
+        // Removing dangerous cards (combo/charge = high threat)
+        if(hK(tgt.cd,'combo')||hK(tgt.cd,'charge'))score+=20;
+        // Clearing path: check if 1-2 rows away from enemy temple after kill
+        const fd=fwd('ai');
+        for(let d=1;d<=3;d++){const nr=action.tr+fd*d;if(!inB(nr,action.tc)||isRuin(nr,action.tc))break;const ne=G.board[nr][action.tc];if(ne&&ne.t==='temple'&&ne.owner==='p1'){score+=30*(4-d);break;}if(ne&&ne.t==='card')break;}
+      }else if(action.result==='blast'){
+        score+=30; // blast always kills regardless of type
+        if(columnClear(action.tr,action.tc,'ai'))score+=30;
+      }else if(action.result==='lose'){
+        score-=40;
+        if(hK(atk.cd,'combo')||hK(atk.cd,'charge'))score-=15; // extra caution with valuable cards
+        // Only acceptable in DEFEND to block temple threat
+        if(strat==='DEFEND')score+=25;
+      }else score+=4;
+      break;
+    }
+    case'ranged':{
+      if(action.effective){
+        score+=62;
+        if(columnClear(action.tr,action.tc,'ai'))score+=38;
+        const tgt=G.board[action.tr][action.tc];
+        if(tgt){
+          if(hK(tgt.cd,'combo')||hK(tgt.cd,'charge'))score+=20; // dangerous cards worth eliminating
+          const onStratCol=(strat==='CENTRAL'&&action.tc===1)||(strat==='LATERAL'&&action.tc!==1);
+          if(onStratCol)score+=20;else score-=5;
+        }
+      }else score-=15; // Don't waste action on ineffective ranged
+      break;
+    }
+    case'move':{
+      const mover=G.board[action.fr][action.fc];if(!mover)break;
+      const fd=fwd('ai'),isForward=(action.tr-action.fr)*fd>0;
+      const onStratCol=(strat==='CENTRAL'&&action.tc===1)||(strat==='LATERAL'&&action.tc!==1)||(strat==='DEFEND');
+      score+=isForward?8:1;
+      if(onStratCol)score+=15;else score-=8;  // off-strategy move: nudge, not wall
+      // Don't advance into losing combat
+      const nextR=action.tr+fd;
+      if(inB(nextR,action.tc)){
+        const ahead=G.board[nextR][action.tc];
+        if(ahead&&ahead.t==='card'&&ahead.owner==='p1'){
+          const prev=previewCombat(mover,ahead);
+          if(prev==='lose'){score-=25;if(hK(mover.cd,'combo')||hK(mover.cd,'charge'))score-=15;}
+          else if(prev==='win')score+=18;
+          else if(prev==='blast')score+=8; // blast clears path
+        }
+        if(ahead&&ahead.t==='temple'&&ahead.owner==='p1'){
+          // One move away from attacking temple
+          if(strat==='LATERAL'&&(action.tc===0||action.tc===2))score+=35;
+          if(strat==='CENTRAL'&&action.tc===1)score+=35;
+        }
+      }
+      // Two moves away from temple
+      const twoR=action.tr+fd*2;
+      if(inB(twoR,action.tc)&&!G.board[nextR]?.[action.tc]){
+        const two=G.board[twoR][action.tc];
+        if(two&&two.t==='temple'&&two.owner==='p1')score+=20;
+      }
+      break;
+    }
+    case'deploy':case'deploy_combat':{
+      const ci=G.ai.hand[action.handIdx];if(!ci)break;
+      score+=10;
+      // Counter-type: reward deploying cards that beat enemy types on the board
+      for(const{ci:ec,r:er}of getCards('p1')){
+        const dist=Math.abs(er-(action.tr));
+        if(dist<=3){
+          if((TYPE_BEATS[ci.cd.type]||[]).includes(ec.cd.type))score+=22-dist*3;
+          else if((TYPE_BEATS[ec.cd.type]||[]).includes(ci.cd.type))score-=18;
+        }
+      }
+      // Out-cycle: bias toward countering what's coming next (hand + next draws), not just the board
+      {
+        const upcoming=getP1UpcomingTypes(3);
+        if(upcoming.length){
+          let futBeats=0,futLoses=0;
+          for(const t of upcoming){
+            if((TYPE_BEATS[ci.cd.type]||[]).includes(t))futBeats++;
+            if((TYPE_BEATS[t]||[]).includes(ci.cd.type))futLoses++;
+          }
+          score+=(futBeats-futLoses)*6;
+        }
+      }
+      // Column alignment
+      const onStratCol=(strat==='CENTRAL'&&action.tc===1)||(strat==='LATERAL'&&action.tc!==1)||(strat==='DEFEND');
+      if(onStratCol)score+=18;else score-=10;
+      if(action.type==='deploy_combat'){
+        const tgt=G.board[action.tr][action.tc];
+        if(action.result==='win'){
+          score+=35;
+          if(columnClear(action.tr,action.tc,'ai'))score+=30;
+          if(hK(ci.cd,'combo'))score+=18;
+        }else if(action.result==='lose')score-=28;
+        else if(action.result==='blast')score+=28; // blast always worth it — clears any type
+      }
+      // Special card bonuses
+      if(hK(ci.cd,'ranged'))score+=14;
+      if(hK(ci.cd,'charge'))score+=10;
+      if(strat==='DEFEND'){
+        const threatened=getCards('p1').filter(({r})=>r<=3).map(({c})=>c);
+        if(threatened.includes(action.tc))score+=40;
+      }
+      break;
+    }
+    case'end_turn':score=-80;break;
+  }
+  return Math.round(score);
+}
+function actionWinsGame(action){
+  if(action.type!=='attack_temple')return false;
+  const tpl=G.board[action.tr][action.tc];if(!tpl||tpl.hp>1)return false;
+  if(tpl.sz==='b')return true;
+  return getTemples('p1').filter(t=>t.tpl.sz==='s'&&t.c!==action.tc).length===0;
+}
+function generateAIActions(){
+  const actions=[];
+  for(let r=0;r<7;r++)for(let c=0;c<3;c++){
+    const cell=G.board[r][c];if(!cell||cell.t!=='card'||cell.owner!=='ai')continue;
+    for(const v of validMoveCells(r,c,'ai')){const tgt=G.board[v.r][v.c];if(v.vt==='move')actions.push({type:'move',fr:r,fc:c,tr:v.r,tc:v.c});else if(v.vt==='attk'){if(tgt&&tgt.t==='temple')actions.push({type:'attack_temple',fr:r,fc:c,tr:v.r,tc:v.c});else if(tgt&&tgt.t==='card')actions.push({type:'attack',fr:r,fc:c,tr:v.r,tc:v.c,result:previewCombat(cell,tgt)});}}
+    for(const v of validRangedCells(r,c,'ai')){const tgt=G.board[v.r][v.c];const rres=tgt&&tgt.t==='card'?resolveRanged(cell,tgt):(v.temple?'kill':null);actions.push({type:'ranged',fr:r,fc:c,tr:v.r,tc:v.c,temple:!!v.temple,effective:!!(rres&&rres==='kill')});}
+  }
+  for(const d of validDeployCells('ai')){G.ai.hand.forEach((ci,i)=>{const isCombat=d.vt==='deploy-combat';const tgt=isCombat?G.board[d.r][d.c]:null;const result=isCombat&&tgt?previewCombat(ci,tgt):null;actions.push({type:isCombat?'deploy_combat':'deploy',handIdx:i,tr:d.r,tc:d.c,result});});}
+  actions.push({type:'end_turn'});return actions;
+}
+function shouldAICombo(winner,wr,wc,ct){
+  if(ct.isTemple)return true;
+  const next=G.board[ct.targetR][ct.targetC];if(!next)return false;
+  const res=previewCombat(winner,next);
+  return res==='win'||res==='blast'; // blast always worth chaining if it removes blocker
+}
+function aiCheckCombo(wr,wc,who){
+  who=who||'ai';
+  const winner=G.board[wr]&&G.board[wr][wc];
+  if(!winner||winner.t!=='card'||winner.owner!==who||!hK(winner.cd,'combo'))return;
+  const cts=findComboTargets(winner,wr,wc);
+  if(!cts.length){comboNoTargets(winner);return;}
+  // Pick best: temple > guaranteed win > blast on high-DEF > skip
+  const best=cts.find(ct=>ct.isTemple)||cts.find(ct=>ct.preview==='win')||cts.find(ct=>ct.preview==='blast');
+  if(best&&shouldAICombo(winner,wr,wc,best)){
+    executeCombo(winner,wr,wc,best.targetR,best.targetC,best.isTemple);
+    checkWin();
+    if(G.phase!=='over'&&!best.isTemple&&G.board[best.targetR]&&G.board[best.targetR][best.targetC]===winner){
+      aiCheckCombo(best.targetR,best.targetC,who); // chain from new position
+    }
+  }
+}
+function aiExecuteAction(action){
+  switch(action.type){
+    case'move':case'attack':case'attack_temple':doMove(action.fr,action.fc,action.tr,action.tc,'ai');if(Math.abs(action.tr-action.fr)+Math.abs(action.tc-action.fc)===1)aiCheckCombo(action.tr,action.tc);break;
+    case'ranged':doRanged(action.fr,action.fc,action.tr,action.tc);break;
+    case'deploy':case'deploy_combat':{doDeploy(action.handIdx,action.tr,action.tc,'ai');aiCheckCombo(action.tr,action.tc);break;}
+    case'repo':payLife('ai',action.col);break;
+    case'end_turn':G.ai.actLeft=0;break;
+  }
+}
+function buildAIReason(action,score,stratCtx){
+  let s=G.aiMode==='legacy'?'['+G.aiStrat+'] ':'';
+  switch(action.type){
+    case'repo':s+='Repongo el mazo pagando 1 vida del templo de la columna C'+dC(action.col)+'.';break;
+    case'attack_temple':{const t=G.board[action.tr][action.tc];s+='Ataco templo '+(t?t.sz==='b'?'Central':'Chico':'?')+' en '+pos(action.tr,action.tc)+' ('+(t?t.hp+'/'+t.maxHp:'?')+'HP)'+(t&&t.hp===1?' — ¡golpe final!':'')+'. Score:'+score;break;}
+    case'attack':{const a=G.board[action.fr][action.fc];const d=G.board[action.tr][action.tc];s+='Ataco '+(d?d.cd.name:'?')+' en '+pos(action.tr,action.tc)+' con '+(a?a.cd.name:'?')+' → '+action.result+'. Score:'+score;break;}
+    case'ranged':{const src=G.board[action.fr][action.fc];const tgt=G.board[action.tr][action.tc];s+='Ranged '+(src?src.cd.name:'?')+'→'+(tgt?(tgt.cd?tgt.cd.name:'templo'):'?')+' ['+(action.effective?'efectivo':'sin efecto')+']. Score:'+score;break;}
+    case'move':{const m=G.board[action.fr][action.fc];s+='Muevo '+(m?m.cd.name:'?')+' '+pos(action.fr,action.fc)+'→'+pos(action.tr,action.tc)+'. Score:'+score;break;}
+    case'deploy':case'deploy_combat':{const ci=G.ai.hand[action.handIdx];s+='Despliego '+(ci?ci.cd.name:'?')+' en '+pos(action.tr,action.tc)+(action.type==='deploy_combat'?' (combate→'+action.result+')':'')+'. Score:'+score;break;}
+    case'end_turn':s+='Sin acción útil. Paso.';break;
+  }
+  return s;
+}
+// ════ AI v2: búsqueda por simulación ════
+// Explora secuencias de acciones del turno (beam search) sobre copias del estado y
+// estima la respuesta del rival con las cartas que ya están en el tablero.
+// No mira la mano ni el mazo del rival.
+// Pesos evolucionados con tools/evolve.js (auto-juego contra el campeón anterior)
+const AI2={beam:12,depth:4,actVal:43,card:2,hand:0.3,adv:7.8,lane:14.6,deployRisk:0.3,tpScale:1500,budgetMs:400,cycle:3,explore:0.1,exploreTol:80};
+function simGet(){return{board:G.board,ruins:G.ruins,p1:G.p1,ai:G.ai,cur:G.cur,winner:G.winner,phase:G.phase};}
+function simSet(s){G.board=s.board;G.ruins=s.ruins;G.p1=s.p1;G.ai=s.ai;G.cur=s.cur;G.winner=s.winner;G.phase=s.phase;}
+function simClone(s){
+  const cp=p=>({hand:p.hand.slice(),deck:p.deck.slice(),discard:(p.discard||[]).slice(),actLeft:p.actLeft,actMax:p.actMax});
+  return{board:s.board.map(row=>row.map(c=>c&&c.t==='temple'?{...c}:c)),ruins:new Set(s.ruins),p1:cp(s.p1),ai:cp(s.ai),cur:s.cur,winner:s.winner,phase:s.phase};
+}
+function simWith(state,fn){
+  const saved=simGet(),was=G._sim,cpend=G.comboPending;
+  G._sim=true;G.comboPending=null;simSet(state);
+  try{return fn();}finally{simSet(saved);G._sim=was;G.comboPending=cpend;}
+}
+function applyAction(who,a){
+  G.comboPending=null;
+  switch(a.type){
+    case'move':case'attack':case'attack_temple':doMove(a.fr,a.fc,a.tr,a.tc,who);G.comboPending=null;if(G.phase!=='over'&&Math.abs(a.tr-a.fr)+Math.abs(a.tc-a.fc)===1)aiCheckCombo(a.tr,a.tc,who);break;
+    case'ranged':doRanged(a.fr,a.fc,a.tr,a.tc);break;
+    case'repo':payLife(who,a.col);break;
+    case'deploy':case'deploy_combat':{
+      doDeploy(a.handIdx,a.tr,a.tc,who);G.comboPending=null;
+      if(G.phase!=='over')aiCheckCombo(a.tr,a.tc,who);break;}
+  }
+  
+}
+function simApply(state,who,a){
+  const n=simClone(state);
+  simWith(n,()=>{
+    applyAction(who,a);
+    const p=gP(who);if(a.type==='end_turn')p.actLeft=0;else p.actLeft--;
+    n.winner=G.winner;n.phase=G.phase;
+  });
+  return n;
+}
+function simEndTurn(state,who){
+  const n=simClone(state);
+  simWith(n,()=>{drawCards(who);const o=opp(who);n.cur=o;gP(o).actLeft=gP(o).actMax;});
+  n.cur=opp(who);return n;
+}
+function genActions(state,who,noDeploy){
+  return simWith(state,()=>{
+    const acts=[];
+    for(let r=0;r<7;r++)for(let c=0;c<3;c++){
+      const cell=G.board[r][c];if(!cell||cell.t!=='card'||cell.owner!==who)continue;
+      for(const v of validMoveCells(r,c,who)){
+        const tgt=G.board[v.r][v.c];
+        if(v.vt==='move')acts.push({type:'move',fr:r,fc:c,tr:v.r,tc:v.c});
+        else if(tgt&&tgt.t==='temple')acts.push({type:'attack_temple',fr:r,fc:c,tr:v.r,tc:v.c});
+        else if(tgt&&tgt.t==='card')acts.push({type:'attack',fr:r,fc:c,tr:v.r,tc:v.c,result:previewCombat(cell,tgt)});
+      }
+      for(const v of validRangedCells(r,c,who)){const tgt=G.board[v.r][v.c];acts.push({type:'ranged',fr:r,fc:c,tr:v.r,tc:v.c,temple:!!v.temple,effective:!!v.temple||!!(tgt&&resolveRanged(cell,tgt)==='kill')});}
+    }
+    if(!noDeploy){
+      const hand=gP(who).hand;
+      for(const d of validDeployCells(who))hand.forEach((ci,i)=>{
+        const combat=d.vt==='deploy-combat',tgt=combat?G.board[d.r][d.c]:null;
+        const base={type:combat?'deploy_combat':'deploy',handIdx:i,tr:d.r,tc:d.c,result:combat&&tgt?previewCombat(ci,tgt):null};
+        acts.push(base);
+      });
+    }
+    const pl=gP(who);
+    if(dc(pl).length>0)for(let c=0;c<3;c++){const t=G.board[tRow(who)][c];if(t&&t.t==='temple'&&t.hp>0)acts.push({type:'repo',col:c});}
+    acts.push({type:'end_turn'});
+    // no se puede pasar: si hay alguna acción posible (incluida reponer), se quita "terminar turno"
+    return acts.length>1?acts.filter(a=>a.type!=='end_turn'):acts;
+  });
+}
+function evalState(s,me){
+  if(s.winner)return s.winner===me?100000:-100000;
+  const you=opp(me);
+  const tp=n=>n<=0?100000:AI2.tpScale/n;
+  const temples=who=>{let c=0,sm=0;const row=who==='p1'?6:0;for(let k=0;k<3;k++){const t=s.board[row][k];if(t&&t.t==='temple'&&t.hp>0){if(t.sz==='b')c=t.hp;else sm+=t.hp;}}return tp(c)+0.7*tp(sm);};
+  const cards=who=>{
+    let v=0;const fd=fwd(who),enemy=opp(who),eRow=who==='p1'?0:6,dRow=who==='p1'?1:5;
+    for(let r=0;r<7;r++)for(let c=0;c<3;c++){
+      const ce=s.board[r][c];if(!ce||ce.t!=='card'||ce.owner!==who)continue;
+      const adv=who==='p1'?6-r:r;
+      v+=AI2.card+AI2.adv*adv;
+      // distancia libre hacia un templo vivo del rival en su columna
+      let d=0,clear=false;
+      for(let k=1;k<=6;k++){const nr=r+fd*k;if(nr<0||nr>6||s.ruins.has(nr+','+c))break;const x=s.board[nr][c];if(!x)continue;if(x.t==='temple'&&x.owner===enemy&&x.hp>0){clear=true;d=k;}break;}
+      if(clear){const eff=hK(ce.cd,'charge')?Math.ceil(d/2):d;v+=AI2.lane/eff;}
+      if(r===dRow)v-=AI2.deployRisk;
+    }
+    v+=AI2.hand*gP2(s,who).hand.length;
+    return v;
+  };
+  const pm=gP2(s,me),py=gP2(s,you);
+  return temples(you)-temples(me)+AI2.actVal*(pm.actMax-py.actMax)+cards(me)-cards(you)+AI2.cycle*((pm.hand.length+pm.deck.length)-(py.hand.length+py.deck.length));
+}
+function gP2(s,who){return who==='p1'?s.p1:s.ai;}
+function oppReply(state,me){
+  const o=opp(me);let s=simEndTurn(state,me);
+  const n=s[o].actLeft;
+  for(let i=0;i<n&&!s.winner;i++){
+    let bestS=null,bestV=evalState(s,o);
+    for(const a of genActions(s,o,true)){
+      if(a.type==='end_turn')continue;
+      const s2=simApply(s,o,a),v=evalState(s2,o);
+      if(v>bestV){bestV=v;bestS=s2;}
+    }
+    if(!bestS)break;s=bestS;
+  }
+  return evalState(s,me);
+}
+function aiSearchBest(who){
+  const t0=Date.now();
+  const root=simClone(simGet());
+  const depth=Math.max(1,Math.min(gP(who).actLeft,AI2.depth));
+  let frontier=[{s:root,first:null,ev:evalState(root,who)}];
+  const leaves=[];
+  for(let d=0;d<depth;d++){
+    if(d>0&&Date.now()-t0>AI2.budgetMs)break;
+    const cand=[];
+    for(const nd of frontier){
+      for(const a of genActions(nd.s,who)){
+        if(a.type==='end_turn'){leaves.push({s:nd.s,first:nd.first||a,ev:nd.ev,ended:true});continue;}
+        const s2=simApply(nd.s,who,a),ev=evalState(s2,who);
+        const node={s:s2,first:nd.first||a,ev:ev};
+        if(s2.winner)leaves.push(node);else cand.push(node);
+      }
+    }
+    cand.sort((x,y)=>y.ev-x.ev);
+    frontier=cand.slice(0,AI2.beam);
+  }
+  for(const nd of frontier)leaves.push(nd);
+  leaves.sort((x,y)=>y.ev-x.ev);
+  let best=null,bestV=-Infinity;
+  const top=leaves.slice(0,AI2.beam*2),scored=[];
+  for(const lf of top){
+    const full=lf.ended||lf.s.winner||gP2(lf.s,who).actLeft<=0;
+    let v=lf.s.winner?lf.ev:(full?oppReply(lf.s,who):lf.ev);
+    v+=Math.random()*0.5;
+    if(Date.now()-t0>600&&best)break;
+    if(lf.first)scored.push({v,first:lf.first});
+    if(v>bestV){bestV=v;best=lf;}
+  }
+  // variación dentro de la personalidad: a veces elige la 2.ª o 3.ª mejor jugada distinta si no es mucho peor
+  if(AI2.explore>0&&Math.random()<AI2.explore&&scored.length>1){
+    const seen=new Set(),alts=[];scored.sort((a,b)=>b.v-a.v);
+    for(const c of scored){const k=JSON.stringify(c.first);if(seen.has(k))continue;seen.add(k);alts.push(c);}
+    // con AI2.second solo se considera la 2.ª mejor jugada (coherente, dentro de la tolerancia); si no, la 2.ª o 3.ª
+    const ok=alts.slice(1,AI2.second?2:3).filter(c=>c.v>=alts[0].v-AI2.exploreTol);
+    if(ok.length)return ok[Math.floor(Math.random()*ok.length)].first;
+  }
+  return best&&best.first?best.first:{type:'end_turn'};
+}
+// ════ AI TURN ════
+const AI_TIMEOUT_MS=12000;
+let _aiCountdownInterval=null;
+
+function aiForceEnd(reason){
+  clearInterval(_aiCountdownInterval);_aiCountdownInterval=null;
+  G._aiDeadline=null;G._aiLoopCount=0;
+  log('⚠️ IA '+reason+' — pasó turno.');
+  G.ai.actLeft=0;G.aiThinking=false;
+  drawCards('ai');G.cur='p1';G.p1.actLeft=G.p1.actMax;
+  G.sel=null;G.validCells=[];G.rangedMode=false;G.comboPending=null;
+  log('── <b>Tu turno</b> ──');renderGame();
+}
+function aiStartCountdown(){
+  clearInterval(_aiCountdownInterval);_aiCountdownInterval=null;
+  G._aiDeadline=Date.now()+AI_TIMEOUT_MS;
+  _aiCountdownInterval=setInterval(()=>{
+    if(!G.aiThinking){clearInterval(_aiCountdownInterval);_aiCountdownInterval=null;return;}
+    const rem=Math.ceil((G._aiDeadline-Date.now())/1000);
+    const el=document.getElementById('ai-countdown');if(el)el.textContent=rem+'s';
+    if(rem<=0){clearInterval(_aiCountdownInterval);_aiCountdownInterval=null;aiForceEnd('timeout');}
+  },250);
+}
+function aiEndTurn(){
+  clearInterval(_aiCountdownInterval);_aiCountdownInterval=null;
+  G._aiDeadline=null;G._aiLoopCount=0;
+  G.aiThinking=false;drawCards('ai');G.cur='p1';G.p1.actLeft=G.p1.actMax;
+  G.sel=null;G.validCells=[];G.rangedMode=false;G.comboPending=null;
+  log('── <b>Tu turno</b> ──');renderGame();
+}
+async function aiTurn(){
+  if(G.phase==='over'){G.aiThinking=false;renderGame();return;}
+  if(!G.aiThinking){return;} // guard: don't run if turn was already ended externally
+  if(G.ai.actLeft<=0){aiEndTurn();return;}
+
+  // Wall-clock timeout guard
+  if(G._aiDeadline&&Date.now()>G._aiDeadline){aiForceEnd('timeout');return;}
+
+  // Loop-count guard (secondary)
+  G._aiLoopCount=(G._aiLoopCount||0)+1;
+  if(G._aiLoopCount===1&&G.aiMode!=='legacy')aiMood();
+  if(G._aiLoopCount>30){aiForceEnd('loop limit');return;}
+
+  let stratReason,threat,actions,scored,best;
+  try{
+    const legacy=G.aiMode==='legacy';
+    if(legacy){stratReason=aiEvalStrategy();threat=detectPlayerThreat();}else{stratReason='búsqueda';threat=null;}
+    actions=generateAIActions();
+    if(!actions||!actions.length){log('⚠️ IA: generateAIActions devolvió vacío','ai-logic');aiEndTurn();return;}
+    if(!legacy){best={action:aiSearchBest('ai'),score:0};}else{
+
+    function effectiveScore(a){
+      let s=aiScoreAction(a);
+      if(!threat)return s;
+      const col=threat.col;
+      const urgBonus=threat.urgency==='CRITICAL'?200:threat.urgency==='HIGH'?120:60;
+      if((a.type==='deploy'||a.type==='deploy_combat')&&a.tc===col){
+        const ci=G.ai.hand[a.handIdx];
+        if(ci){s+=urgBonus;if(a.result==='lose')s-=40;}
+      }
+      if(a.type==='move'&&a.tc===col){
+        const p1InCol=getCards('p1').filter(x=>x.c===col);
+        if(p1InCol.length){const closestP1=p1InCol.reduce((best,x)=>x.r<best.r?x:best,p1InCol[0]);if(a.tr>0&&a.tr<closestP1.r)s+=urgBonus;}
+      }
+      if((a.type==='attack'||a.type==='ranged')&&a.tc===col&&a.result!=='lose')s+=urgBonus;
+      if(threat.urgency==='CRITICAL'&&a.tc!==col&&a.type==='move')s-=40;
+      return s;
+    }
+
+    scored=actions.map(a=>({action:a,score:effectiveScore(a)}));
+    best=scored.find(s=>actionWinsGame(s.action));
+    if(!best){
+      const nonEnd=scored.filter(s=>s.action.type!=='end_turn');
+      if(nonEnd.length){
+        let candidate=nonEnd.reduce((a,b)=>b.score>a.score?b:a);
+        if(candidate.score<=-40){
+          const stratCol=G.aiStrat==='CENTRAL'?[1]:[0,2];
+          const desperate=nonEnd.filter(s=>
+            (s.action.type==='attack'||s.action.type==='deploy_combat'||s.action.type==='move')
+            &&stratCol.includes(s.action.tc||s.action.fc));
+          if(desperate.length){
+            // Among "lose" sacrifices, prefer losing the LEAST valuable card (protect combo/charge cards)
+            function sacVal(s){const a=s.action;const mv=a.fr!=null?G.board[a.fr]&&G.board[a.fr][a.fc]:null;if(!mv)return 0;return(hK(mv.cd,'combo')?3:0)+(hK(mv.cd,'charge')?2:0)+(hK(mv.cd,'ranged')?1:0);}
+            const losers=desperate.filter(s=>s.action.result==='lose');
+            const sac=desperate.find(s=>s.action.result==='win')||
+                       desperate.find(s=>s.action.result==='blast')||
+                       (losers.length?losers.reduce((a,b)=>sacVal(b)<sacVal(a)?b:a):null)||
+                       desperate.reduce((a,b)=>b.score>a.score?b:a);
+            log('⚡ IA sacrifica en '+pos(sac.action.tr!=null?sac.action.tr:sac.action.fr, sac.action.tc!=null?sac.action.tc:sac.action.fc)+'.','ai-logic');
+            candidate=sac;
+          }
+        }
+        best=candidate;
+      }else{
+        best=scored[scored.length-1];
+      }
+    }
+    }
+  }catch(e){
+    console.error('AI scoring error:',e);
+    const ctx=`REC:${G._aiLoopCount||0} actLeft:${G.ai.actLeft} board:${JSON.stringify(G.board?.map(r=>r?.map(c=>c?c.t[0]+(c.owner==='ai'?'A':'P'):'·')))}`;
+    log(`❌ IA error — ${e.constructor.name}: ${e.message} | Loop#${G._aiLoopCount||0} | ${ctx.slice(0,120)}`,'ai-error');
+    log(`   Stack: ${(e.stack||'').split('\n').slice(0,3).join(' ← ')}`,'ai-error');
+    aiForceEnd('error');return;
+  }
+
+  // Verify best is valid
+  if(!best||!best.action){aiEndTurn();return;}
+
+  const threatNote=threat?' ⚠️ '+threat.msg:'';
+  log('🧠 '+buildAIReason(best.action,best.score,stratReason+threatNote).replace(/\s*Score:-?\d+\.?/,''),'ai-logic');
+  ghRecord('IA',best.action.type,buildAIReason(best.action,best.score,'').replace('['+G.aiStrat+'] ',''));
+
+  // ── Highlight src→tgt before executing ──
+  {
+    const a=best.action;
+    const hl={fr:a.fr,fc:a.fc,tr:a.tr!=null?a.tr:a.fr,tc:a.tc!=null?a.tc:a.fc};
+    G._aiHL=(hl.tr!=null&&hl.tc!=null)?hl:null;
+    renderGame();if(G._aiHL)aimFx(hl);
+    await sleep(hl.tr!=null?420:250);
+    G._aiHL=null;
+  }
+  if(G.phase==='over'){G.aiThinking=false;renderGame();return;}
+  if(!G.aiThinking){return;}
+
+  try{aiExecuteAction(best.action);}catch(e){
+    console.error('AI execute error:',e);
+    log(`❌ IA execute error — ${e.constructor.name}: ${e.message} | action:${JSON.stringify(best.action)}`,'ai-error');
+    log(`   Stack: ${(e.stack||'').split('\n').slice(0,3).join(' ← ')}`,'ai-error');
+    aiForceEnd('error');return;
+  }
+  checkWin();
+  if(G.phase==='over'){G.aiThinking=false;renderGame();return;}
+  if(best.action.type!=='end_turn')G.ai.actLeft--;
+  renderGame();const fxw=G._fxEnd||0;
+  if(G.ai.actLeft>0&&best.action.type!=='end_turn'){
+    await sleep(Math.max(360,fxw+120));
+    if(G.aiThinking)await aiTurn();
+  }else{await sleep(Math.max(180,fxw+120));aiEndTurn();}
+}
+
+// ════ RENDER ════
+ICON_PATHS.left='<path d="M19 12H5M11 6l-6 6 6 6"/>';
+ICON_PATHS.right='<path d="M5 12h14M13 6l6 6-6 6"/>';
+let _prevPos={},_curPos={},_prevHp={},_curHp={},_lastCur=null,_endKeys=new Set();
+// Casilleros que definieron el resultado (para marcarlos al terminar la partida)
+function computeEndKeys(){
+  const keys=new Set();if(G.phase!=='over')return keys;
+  const loser=G.winner==='p1'?'ai':'p1',row=tRow(loser);
+  if(G.ruins.has(row+',1'))keys.add(row+',1');else[0,2].forEach(c=>{if(G.ruins.has(row+','+c))keys.add(row+','+c);});
+  return keys;
+}
+// Todo lo que cambia (acciones, mazo, descarte, vida de templos, turno, cartas nuevas en mano) destella un momento
+// El tablero ocupa todo el alto libre: la separación con las barras queda igual que entre la barra tuya y la mano
+function fitBoard(){
+  if(typeof getComputedStyle!=='function')return;
+  const gb=document.querySelector('.g2-board'),bd=gb&&gb.querySelector('.board');if(!bd)return;
+  const cs=getComputedStyle(bd),pad=(parseFloat(cs.paddingTop)||0)*2+(parseFloat(cs.borderTopWidth)||0)*2,gap=(parseFloat(cs.rowGap)||0)*6;
+  const ch=Math.floor((gb.clientHeight-pad-gap)/7);if(ch>=30)bd.style.setProperty('--ch',Math.min(ch,110)+'px');
+}
+window.addEventListener('resize',()=>{if(G.phase==='game'||G.phase==='over')fitBoard();});
+let _flash=null;
+function flashChanges(){
+  const gs=document.getElementById('game-screen');if(!gs)return;
+  const first=_flash===null;if(first)_flash={};
+  const seen={};
+  gs.querySelectorAll('[data-fk]').forEach(e=>{
+    const k=e.getAttribute('data-fk'),v=e.getAttribute('data-fv');seen[k]=v;
+    const prev=_flash[k];
+    if(!first&&(k.indexOf('h.')===0?prev===undefined:(prev!==undefined&&prev!==v))){
+      e.classList.add(k.indexOf('h.')===0?'flash-new':'flash');
+      if(k.indexOf('tp.')===0||k==='turn'||k==='status')e.classList.add('flash-soft');
+    }
+  });
+  _flash=seen;
+}
+const FX_DIE=360;
+function playFx(boardArg,posArg){try{_playFx(boardArg,posArg);}catch(e){G._fx=[];G._fxEnd=0;}}
+function _playFx(boardArg,posArg){
+  const list=G._fx||[];G._fx=[];G._fxT=0;G._fxEnd=0;G._slideEnd={};
+  const gs=document.getElementById('game-screen'),board=boardArg||(gs&&gs.querySelector('.board'));
+  if(!list.length||!board||!board.animate)return;
+  const lay=document.createElement('div');lay.className='fx-layer';board.appendChild(lay);
+  const cells=[...board.querySelectorAll('.cell')],L=lay.getBoundingClientRect();
+  const rect=(r,c)=>{const e=cells[r*3+c];if(!e)return null;const b=e.getBoundingClientRect();return{x:b.left-L.left,y:b.top-L.top,w:b.width,h:b.height,cx:b.left-L.left+b.width/2,cy:b.top-L.top+b.height/2};};
+  const place=(el,R)=>{el.style.left=R.x+'px';el.style.top=R.y+'px';el.style.width=R.w+'px';el.style.height=R.h+'px';};
+  const ghost=(g,R)=>{const e=document.createElement('div');e.className='cell fx-card t-'+g.type+' c-'+g.owner;e.innerHTML=g.html;place(e,R);lay.appendChild(e);return e;};
+  const NF={duration:1,fill:'both'};let end=0;const hide={};
+  const done=t=>{end=Math.max(end,t);};
+  // las cartas que se desplazan aparecen en destino recién cuando termina su último desplazamiento
+  list.filter(f=>f.k==='slide').forEach(f=>{hide[f.inst]=Math.max(hide[f.inst]||0,f.at+f.dur);});
+  list.filter(f=>f.k==='hold').forEach(f=>{hide[f.inst]=Math.max(hide[f.inst]||0,f.until);});
+  Object.keys(hide).forEach(inst=>{
+    const key=(posArg||_curPos)[inst];if(!key)return;const[r,c]=key.split(',').map(Number),cd=cells[r*3+c]&&cells[r*3+c].querySelector('.cd');if(!cd)return;
+    cd.style.visibility='hidden';setTimeout(()=>{cd.style.visibility='';},hide[inst]);
+  });
+  list.forEach(f=>{
+    const at=f.at||0;
+    if(f.k==='slide'){
+      const A=rect(f.fr,f.fc),B=rect(f.tr,f.tc);if(!A||!B)return;
+      const e=ghost(f.g,A);e.style.zIndex=5;
+      const V=f.via?rect(f.via.r,f.via.c):null;
+      const kf=V?[{transform:'translate(0,0)'},{transform:'translate('+(V.x-A.x)+'px,'+(V.y-A.y)+'px)',offset:.5},{transform:'translate('+(B.x-A.x)+'px,'+(B.y-A.y)+'px)'}]
+                :[{transform:'translate(0,0)'},{transform:'translate('+(B.x-A.x)+'px,'+(B.y-A.y)+'px)'}];
+      e.animate(kf,{duration:f.dur,delay:at,easing:V?'ease-in-out':'cubic-bezier(.4,0,.2,1)',fill:'forwards'}).finished.then(()=>e.remove(),()=>{});
+      e.style.opacity='0';e.animate([{opacity:1},{opacity:1}],{duration:f.dur,delay:at,fill:'forwards'});
+      setTimeout(()=>e.remove(),at+f.dur+30);done(at+f.dur);
+    }else if(f.k==='ghost'){
+      const R=rect(f.r,f.c);if(!R)return;const e=ghost(f.g,R);e.classList.add('fx-'+(f.tn||'none'));e.style.zIndex=f.show!=null?6:3;
+      const show=f.show||0,fade=f.fade||FX_DIE,total=f.dieAt+fade,o=x=>Math.min(1,x/total);
+      const kf=[];if(show>0)kf.push({opacity:0,transform:'scale(1)',offset:0},{opacity:0,transform:'scale(1)',offset:o(show)-.0001});
+      if(f.drop)kf.push({opacity:.2,transform:'scale(1.35)',offset:o(show)},{opacity:1,transform:'scale(1)',offset:o(show+170)});
+      else kf.push({opacity:1,transform:'scale(1)',offset:o(show)});
+      kf.push({opacity:1,transform:'scale(1)',offset:o(f.dieAt)},{opacity:0,transform:'scale(.72)',offset:1});
+      e.animate(kf,{duration:total,easing:'ease-out',fill:'both'}).finished.then(()=>e.remove(),()=>{});
+      setTimeout(()=>e.remove(),total+60);done(total);
+    }else if(f.k==='burst'){
+      const R=rect(f.r,f.c);if(!R)return;const sz=Math.max(26,Math.min(R.w,R.h)*.62);
+      const e=document.createElement('div');e.className='fx-burst fx-'+f.tn;e.innerHTML=ic(f.icon);
+      e.style.cssText+='left:'+(R.cx-sz/2)+'px;top:'+(R.cy-sz/2)+'px;width:'+sz+'px;height:'+sz+'px;font-size:'+sz*.55+'px;opacity:0';lay.appendChild(e);
+      e.animate([{opacity:0,transform:'scale(.3)'},{opacity:1,transform:'scale(1.18)',offset:.35},{opacity:1,transform:'scale(1)',offset:.7},{opacity:0,transform:'scale(1)'}],{duration:620,delay:at,easing:'ease-out',fill:'both'}).finished.then(()=>e.remove(),()=>{});
+      const ring=document.createElement('div');ring.className='fx-ring fx-'+f.tn;ring.style.cssText+='left:'+(R.cx-sz/2)+'px;top:'+(R.cy-sz/2)+'px;width:'+sz+'px;height:'+sz+'px;opacity:0';lay.appendChild(ring);
+      ring.animate([{opacity:.7,transform:'scale(.6)'},{opacity:0,transform:'scale(2.2)'}],{duration:560,delay:at,easing:'ease-out',fill:'both'}).finished.then(()=>ring.remove(),()=>{});
+      setTimeout(()=>{e.remove();ring.remove();},at+700);done(at+560);
+    }else if(f.k==='float'){
+      const R=rect(f.r,f.c);if(!R)return;
+      const e=document.createElement('div');e.className='fx-float fx-'+f.tn;e.textContent=f.text;e.style.cssText+='left:'+R.cx+'px;top:'+(R.y+R.h*.25)+'px;opacity:0';lay.appendChild(e);
+      e.animate([{opacity:0,transform:'translate(-50%,6px)'},{opacity:1,transform:'translate(-50%,-6px)',offset:.25},{opacity:1,transform:'translate(-50%,-20px)',offset:.7},{opacity:0,transform:'translate(-50%,-30px)'}],{duration:900,delay:at,fill:'both'}).finished.then(()=>e.remove(),()=>{});
+      setTimeout(()=>e.remove(),at+1000);
+    }else if(f.k==='shot'){
+      const A=rect(f.fr,f.fc),B=rect(f.tr,f.tc);if(!A||!B)return;
+      const e=document.createElement('div');e.className='fx-shot fx-'+f.tn;e.style.cssText+='left:'+(A.cx-6)+'px;top:'+(A.cy-6)+'px;opacity:0';lay.appendChild(e);
+      e.animate([{opacity:1,transform:'translate(0,0)'},{opacity:1,transform:'translate('+(B.cx-A.cx)+'px,'+(B.cy-A.cy)+'px)',offset:.92},{opacity:0,transform:'translate('+(B.cx-A.cx)+'px,'+(B.cy-A.cy)+'px)'}],{duration:f.dur+40,delay:at,easing:'ease-in',fill:'both'}).finished.then(()=>e.remove(),()=>{});
+      setTimeout(()=>e.remove(),at+f.dur+120);done(at+f.dur);
+    }
+  });
+  G._fxEnd=end;setTimeout(()=>lay.remove(),end+200);
+}
+// Línea de apuntado: la IA "elige" una carta y su objetivo antes de actuar
+function aimFx(hl){try{_aimFx(hl);}catch(e){}}
+function _aimFx(hl){
+  const gs=document.getElementById('game-screen'),board=gs&&gs.querySelector('.board');if(!board||hl.fr==null)return;
+  if(hl.fr===hl.tr&&hl.fc===hl.tc)return;
+  const cells=[...board.querySelectorAll('.cell')],a=cells[hl.fr*3+hl.fc],b=cells[hl.tr*3+hl.tc];if(!a||!b)return;
+  const L=board.getBoundingClientRect(),ra=a.getBoundingClientRect(),rb=b.getBoundingClientRect();
+  const ax=ra.left+ra.width/2-L.left,ay=ra.top+ra.height/2-L.top,bx=rb.left+rb.width/2-L.left,by=rb.top+rb.height/2-L.top;
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('class','fx-aim');svg.setAttribute('width',L.width);svg.setAttribute('height',L.height);
+  svg.innerHTML='<line x1="'+ax+'" y1="'+ay+'" x2="'+bx+'" y2="'+by+'"/><circle cx="'+bx+'" cy="'+by+'" r="7"/>';
+  board.appendChild(svg);setTimeout(()=>svg.remove(),420);
+}
+let _handH=0;
+function keepHandH(){const h=document.querySelector('.hand-grid .hcard');if(h&&h.offsetHeight)_handH=h.offsetHeight;}
+function renderGame(){
+  if(G.phase==='over'){renderGameOver();return;}
+  const gs=document.getElementById('game-screen');
+  _curPos={};_curHp={};
+  const turnChanged=G.cur!==_lastCur;_lastCur=G.cur;
+  gs.innerHTML='';gs.appendChild(buildArena(turnChanged));
+  _prevPos=_curPos;_prevHp=_curHp;_deckPrev={p1:G.p1.deck.length,ai:G.ai.deck.length};keepHandH();fitBoard();playFx();flashChanges();
+}
+function g2Btn(icn,label,fn,dis,cls){const b=el('button','btn icon sm '+(cls||''));b.innerHTML=ic(icn);b.setAttribute('aria-label',label);b.setAttribute('data-tip',label);if(fn)b.onclick=fn;if(dis)b.disabled=true;return b;}
+function g2Status(){const st=mkStatus();st.classList.add('g2-status');st.setAttribute('role','button');st.setAttribute('aria-label','Estado del juego: tocá para ver el registro');st.onclick=()=>toggleLog();return st;}
+// Barra de jugador: [nombre][estado][acciones · mazo · descarte][reponer / contexto][menú]; la IA usa las mismas columnas
+function mkBar(who){
+  const me=who==='p1',d=el('div','g2-bar g2-'+who+(G.cur===who&&G.phase!=='over'?' g2-on':''));
+  const n=el('span','g2-name');n.textContent=me?'P1':'IA';n.setAttribute('data-fk','turn.'+who);n.setAttribute('data-fv',G.cur===who?'1':'0');d.appendChild(n);
+  if(me)d.appendChild(g2Status());
+  else d.appendChild(el('span'));
+  const sx=el('span','g2-stats');sx.innerHTML=statsHTML(who);d.appendChild(sx);
+  const c1=el('span','g2-slot'),c2=el('span','g2-slot');
+  if(me){
+    const mine=G.cur==='p1'&&!G.aiThinking&&G.phase!=='over';
+    if(G.phase==='over')c1.appendChild(g2Btn('refresh','Nueva partida',()=>restartGame(),false,'primary'));
+    else if(G.comboPending&&G.cur==='p1')c1.appendChild(g2Btn('undo','Pasar combo',()=>playerComboSkip()));
+    else if(G.mode)c1.appendChild(g2Btn('close','Cancelar',()=>cancelMode()));
+    else if(G.sel){
+      const selCard=G.sel.from==='board'&&G.board[G.sel.r]&&G.board[G.sel.r][G.sel.c]||null;
+      const rngT=selCard&&hK(selCard.cd,'ranged')?validRangedCells(G.sel.r,G.sel.c,'p1'):[];
+      c1.appendChild(rngT.length?g2Btn('ranged','Disparo',()=>toggleRangedMode(),false,'violet'+(G.rangedMode?' on':'')):g2Btn('close','Cancelar',()=>clearSel()));
+    }
+    else {const noCards=!G.p1.hand.length&&!G.board.some(r=>r.some(c=>c&&c.t==='card'&&c.owner==='p1'));
+      c1.appendChild(g2Btn('refresh','Reponer',()=>startRepo(),!mine||!dc(G.p1).length,mine&&noCards&&dc(G.p1).length?'primary repo-hot':''));}
+    const mb=g2Btn('more','Menú',()=>toggleMenu());c2.appendChild(mb);
+    if(G._menu){
+      const m=el('div','menu');
+      const it=(icn,label,fn)=>{const b=el('button','menu-item');b.innerHTML=ic(icn)+label;b.onclick=()=>{G._menu=false;fn();};return b;};
+      m.appendChild(it('help','Reglas y tutorial',()=>{renderGame();openRules();}));
+      m.appendChild(it('list','Registro',()=>toggleLog()));
+      m.appendChild(it(window._muted?'mute':'sound','Sonido',()=>toggleMute()));
+      m.appendChild(it('close','Abandonar partida',()=>{G.confirm={type:'quit'};renderGame();}));
+      d.appendChild(m);
+    }
+  }
+  d.appendChild(c1);d.appendChild(c2);return d;
+}
+function buildArena(flash){
+  const a=el('div','g2');
+  const lg=el('div','g2-logo');lg.innerHTML=ic('tower')+'<span>Spire Arena</span>';a.appendChild(lg);
+  a.appendChild(mkBar('ai'));
+  const bw=el('div','g2-board');bw.appendChild(mkBoard());a.appendChild(bw);
+  a.appendChild(mkBar('p1'));a.appendChild(mkHand());a.appendChild(mkLog());
+  if(G._menu){const bg=el('div','menu-bg');bg.onclick=()=>toggleMenu();a.appendChild(bg);}
+  const dlg=mkConfirm();if(dlg)a.appendChild(dlg);
+  return a;
+}
+let _deckPrev={p1:null,ai:null};
+function statsHTML(who){
+  const isActive=G.cur===who&&G.phase!=='over',p=gP(who);
+  let bolts='';for(let i=0;i<Math.min(p.actMax,6);i++)bolts+=ic('bolt',isActive&&i<p.actLeft?'on':'');
+  return '<span class="acts" data-tip="Acciones por turno">'+bolts+'<span class="acts-txt" data-fk="acts.'+who+'" data-fv="'+(isActive?p.actLeft:0)+'/'+p.actMax+'">'+(isActive?p.actLeft:0)+'/'+p.actMax+'</span></span>'
+    +'<span class="deck-chip'+(_deckPrev[who]!==null&&p.deck.length>_deckPrev[who]?' bump':'')+'" data-tip="Mazo">'+ic('deck')+'<b data-fk="deck.'+who+'" data-fv="'+p.deck.length+'">'+p.deck.length+'</b></span>'
+    +'<span class="deck-chip" data-tip="Descarte">'+ic('trash')+'<b data-fk="disc.'+who+'" data-fv="'+dc(p).length+'">'+dc(p).length+'</b></span>';
+}
+function mkPanel(who){
+  const d=el('div','pn p-'+who+' pn-'+who);
+  d.innerHTML='<div class="pn-avatar">'+ic(who==='p1'?'user':'cpu')+'</div><div class="pn-name">'+(who==='p1'?'Vos':'IA')+'</div><div class="pn-stats">'+statsHTML(who)+'</div>';
+  if(who==='ai'){
+    const mb=el('button','btn icon sm menu-btn');mb.innerHTML=ic('more');mb.setAttribute('aria-label','Menú');mb.setAttribute('data-tip','Menú');mb.onclick=()=>toggleMenu();d.appendChild(mb);
+    if(G._menu){
+      const m=el('div','menu');
+      const it=(icn,label,fn)=>{const b=el('button','menu-item');b.innerHTML=ic(icn)+label;b.onclick=()=>{G._menu=false;fn();};return b;};
+      m.appendChild(it('help','Reglas',()=>{renderGame();openRules();}));
+      m.appendChild(it('list','Registro',()=>toggleLog()));
+      m.appendChild(it(window._muted?'mute':'sound','Sonido',()=>toggleMute()));
+      d.appendChild(m);
+    }
+  }
+  return d;
+}
+function toggleMenu(){G._menu=!G._menu;renderGame();}
+function toggleMute(){window._muted=!window._muted;try{localStorage.setItem('spire-mute',window._muted?'1':'');}catch(e){}renderGame();}
+function mkAiHand(){
+  const w=el('div','ai-hand-box');
+  const t=el('div','hand-title');t.textContent='Mano de la IA';w.appendChild(t);
+  const h=el('div','ai-hand');G.ai.hand.forEach(()=>{const b=el('div','card-back');b.innerHTML=ic('spire');h.appendChild(b);});
+  w.appendChild(h);return w;
+}
+function mkHand(){
+  const isMT=G.cur==='p1'&&!G.aiThinking&&!G.comboPending&&G.phase!=='over'&&!G.mode&&!G.confirm;
+  const w=el('div','hand-box');
+  const t=el('div','hand-title');t.textContent='Tu mano';w.appendChild(t);
+  const g=el('div','hand-grid');
+  G.p1.hand.forEach((ci,i)=>{
+    const isSel=G.sel&&G.sel.from==='hand'&&G.sel.idx===i;
+    const hc=el('div','hcard t-'+ci.cd.type+(isSel?' hsel':'')+(!isMT?' hdim':''));
+    hc.innerHTML=cardHTML(ci.cd,'hand');hc.setAttribute('data-fk','h.'+ci.inst);hc.setAttribute('data-fv','1');
+    if(isMT)hc.addEventListener('click',()=>clickHandCard(i));
+    g.appendChild(hc);
+  });
+  if(!G.p1.hand.length){const e=el('div','hand-empty');e.textContent='Sin cartas en la mano';if(_handH)e.style.height=_handH+'px';g.appendChild(e);}
+  w.appendChild(g);return w;
+}
+function mkBoard(){
+  const b=el('div','board'+(G.aiThinking?' dimmed':'')+(G.phase==='over'&&_endKeys.size?' has-keys':''));
+  for(let r=0;r<7;r++)for(let c=0;c<3;c++)b.appendChild(mkCell(r,c));return b;
+}
+function getSelCard(){if(G.sel&&G.sel.from==='board')return G.board[G.sel.r]&&G.board[G.sel.r][G.sel.c]||null;if(G.sel&&G.sel.from==='hand')return G.p1.hand[G.sel.idx]||null;return null;}
+function mkCell(r,c){
+  const content=G.board[r][c];
+  const isSel=G.sel&&G.sel.from==='board'&&G.sel.r===r&&G.sel.c===c;
+  const vc=G.validCells.find(v=>v.r===r&&v.c===c),ruin=isRuin(r,c);
+  const comboTgt=G.comboPending&&G.comboPending.targets?G.comboPending.targets.find(t=>t.targetR===r&&t.targetC===c):null;
+  const isComboTgt=!!comboTgt,dies=isComboTgt&&comboTgt.preview==='lose';
+  const key=r+','+c;
+  let cls='cell',inner='',extra='';
+  if(ruin){cls+=' is-ruin';inner='<div class="ruin">'+ic('ruin')+'</div>';}
+  else if(content){
+    if(content.t==='temple'){
+      const big=content.sz==='b';cls+=' temple o-'+content.owner;
+      _curHp[key]=content.hp;if(_prevHp[key]!=null&&content.hp<_prevHp[key])cls+=' hit';
+      let pips='';for(let i=0;i<content.maxHp;i++)pips+='<span class="pip'+(i<content.hp?' on':'')+'"></span>';
+      inner='<div class="tpl'+(big?' big':'')+'" data-fk="tp.'+r+'.'+c+'" data-fv="'+content.hp+'">'+ic(big?'tower':'temple')+'<div class="pips">'+pips+'</div></div>';
+    }else{
+      cls+=' c-'+content.owner+' t-'+content.cd.type;
+      _curPos[content.inst]=key;if(_prevPos[content.inst]===undefined)cls+=' enter';
+      inner=cardHTML(content.cd,'cell',content.owner==='ai');
+    }
+  }
+  if(isSel)cls+=' sel-cell';
+  if(G.phase==='over'&&_endKeys.has(key))cls+=' end-key';
+  if(G.mode==='repo'&&content&&content.t==='temple'&&content.owner==='p1'&&content.hp>0)cls+=' v-repo clickable';
+  if(isComboTgt)cls+=(dies?' vcombo-lose':' vcombo')+' clickable';
+  else if(vc){if(vc.vt==='move')cls+=' vmove';else if(vc.vt==='attk')cls+=content&&content.t==='temple'?' vattk-temple':' vattk';else if(vc.vt==='deploy-combat')cls+=' vattk';else if(vc.vt==='ranged')cls+=' vranged';cls+=' clickable';}
+  else if(!ruin&&content&&content.t==='card'&&content.owner==='p1'&&G.cur==='p1'&&!G.aiThinking&&!G.comboPending)cls+=' clickable';
+  if(G._aiHL){
+    if(G._aiHL.fr===r&&G._aiHL.fc===c)cls+=' ai-hl-src';
+    if(G._aiHL.tr===r&&G._aiHL.tc===c)cls+=' ai-hl-tgt';
+  }
+  const cell=el('div',cls);cell.innerHTML=inner+extra;
+  // Combat preview for normal attack cells
+  if(!isComboTgt&&vc&&(vc.vt==='attk'||vc.vt==='ranged'||vc.vt==='deploy-combat')&&content&&content.t==='card'){
+    const attacker=getSelCard();
+    if(attacker){
+      const isRng=vc.vt==='ranged';let prev;
+      if(isRng){prev=resolveRanged(attacker,content)==='kill'?'win':'noeffect';}else prev=previewCombat(attacker,content);
+      const k=prev==='win'?(isRng?'ranged':'check'):prev==='lose'?'x':prev==='blast'?'blast':prev==='tie'?'tie':'ban';
+      const cb=el('div','badge '+(prev==='win'?'win':prev==='lose'?'lose':prev==='blast'?'blast':'none'));cb.innerHTML=ic(k);cell.appendChild(cb);
+    }
+  }
+  // Combo target: direction chip + preview badge
+  if(isComboTgt){
+    const dirIc=comboTgt.dc===0?(comboTgt.dr===fwd(G.comboPending.winner.owner)?'F':'B'):(comboTgt.dc<0?'left':'right');
+    const dc=el('div','dir-chip');dc.innerHTML=ic(dirIc);cell.appendChild(dc);
+    const k=comboTgt.isTemple?'temple':comboTgt.preview==='win'?'check':dies?'x':comboTgt.preview==='blast'?'blast':'tie';
+    const cb=el('div','badge '+(comboTgt.isTemple||comboTgt.preview==='win'?'win':dies?'lose':comboTgt.preview==='blast'?'blast':'none'));cb.innerHTML=ic(k);cell.appendChild(cb);
+  }
+  // AI flash overlay (blast / tie)
+  if(G._aiFlash&&G._aiFlash.cells.some(f=>f.r===r&&f.c===c)){
+    const isBlast=String(G._aiFlash.emoji).codePointAt(0)===0x1F4A3;
+    const fo=el('div','ai-flash-overlay'+(isBlast?' blast':''));fo.innerHTML=ic(isBlast?'blast':'tie');cell.appendChild(fo);
+  }
+  cell.addEventListener('click',()=>{
+    if(isComboTgt&&G.comboPending){const idx=G.comboPending.targets.findIndex(t=>t.targetR===r&&t.targetC===c);if(idx>=0)playerComboYes(idx);}
+    else clickCell(r,c);
+  });
+  return cell;
+}
+function mkStatus(){
+  const turnAI=G.cur==='ai';
+  const d=el('div','status'+(turnAI?' ai':''));
+  const txt=STQ.cur||(G.aiThinking?STQ.last:'');
+  d.innerHTML='<span class="turn-pill '+(turnAI?'ai':'me')+'" data-fk="turn" data-fv="'+G.cur+'"></span><div data-fk="status" data-fv="'+esc(txt.slice(0,40))+'">'+esc(txt)+'</div>';
+  return d;
+}
+function mkControls(){
+  const div=el('div','controls'),mine=G.cur==='p1'&&!G.aiThinking&&G.phase!=='over';
+  const btn=(cls,icon,label,fn,dis,tip)=>{const b=el('button','btn '+cls);b.innerHTML=(icon?ic(icon):'')+(label||'');if(fn)b.onclick=fn;if(dis)b.disabled=true;return b;};
+  if(G.phase==='over'){
+    div.appendChild(btn('','trophy','Resultado',()=>{G._overOpen=true;renderGame();}));
+    div.appendChild(btn('primary','refresh','Nueva partida',()=>restartGame()));
+    return div;
+  }
+  const cs=el('div','ctl-stats');cs.innerHTML=statsHTML('p1');div.appendChild(cs);
+  if(G.comboPending&&G.cur==='p1'){div.appendChild(btn('','undo','Pasar combo',()=>playerComboSkip()));return div;}
+  if(G.mode){div.appendChild(btn('sm','close','Cancelar',()=>cancelMode()));return div;}
+  if(G.sel){
+    const selCard=G.sel.from==='board'&&G.board[G.sel.r]&&G.board[G.sel.r][G.sel.c]||null;
+    const rngT=selCard&&hK(selCard.cd,'ranged')?validRangedCells(G.sel.r,G.sel.c,'p1'):[];
+    if(rngT.length)div.appendChild(btn('violet sm'+(G.rangedMode?' on':''),'ranged','Disparo',()=>toggleRangedMode()));
+    div.appendChild(btn('sm cancel','close','<span class="lbl">Cancelar</span>',()=>clearSel()));
+    return div;
+  }
+  const hasCard=getCards('p1').length>0;
+  div.appendChild(btn('sm','refresh','Reponer',()=>startRepo(),!mine||!dc(G.p1).length,'Reponer (1 acción): el descarte vuelve al mazo, completás la mano a 4 y un templo tuyo pierde 1 vida (ganás +1 acción permanente).'));
+  return div;
+}
+function fmtLog(m){return m.replace(/[\p{Extended_Pictographic}️‍]/gu,'').replace(/ {2,}/g,' ').trim();}
+function startRepo(){if(G.cur!=='p1'||G.aiThinking||G.phase==='over'||!dc(G.p1).length)return;G.mode='repo';G.confirm=null;G.sel=null;G.validCells=[];G.rangedMode=false;renderGame();}
+function cancelMode(){G.mode=null;G.confirm=null;renderGame();}
+function backConfirm(){G.confirm=null;renderGame();}
+function doConfirm(){
+  const c=G.confirm;if(!c)return;G.confirm=null;
+  if(c.type==='quit'){G.aiThinking=false;G.phase='sel1';G.mode=null;statusReset();restartGame();return;}
+  G.mode=null;payLife('p1',c.col);
+  if(G.phase==='over'){renderGame();return;}
+  consumeAction('p1');
+}
+function mkConfirm(){
+  const c=G.confirm;if(!c)return null;
+  const ov=el('div','over dlgwrap'),box=el('div','over-box dlg');let title,txt,okLabel,okCls;
+  if(c.type==='quit'){title='¿Abandonar la partida?';txt='';okLabel='Abandonar';okCls='btn danger';}
+  else{
+    const t=G.board[tRow('p1')][c.col],n=dc(G.p1).length,left=t.hp-1;
+    const lose=left<=0&&(t.sz==='b'||[0,2].filter(k=>{const y=G.board[6][k];return y&&y.t==='temple'&&y.hp>0&&k!==c.col;}).length===0);
+    title='Reponer el mazo';
+    txt='El templo <b>'+(t.sz==='b'?'Central':'Chico')+'</b> pierde 1 vida (queda '+Math.max(0,left)+'/'+t.maxHp+').'
+      +(lose?'<br><b style="color:var(--crimson-d)">¡Perderías la partida!</b>':left<=0?'<br><b style="color:var(--crimson-d)">Ese templo quedaría destruido.</b>':'');
+    okLabel='Reponer';okCls='btn danger';
+  }
+  box.innerHTML='<div class="over-title" style="font-size:20px">'+title+'</div>'+(txt?'<div class="over-sub">'+txt+'</div>':'')+'<div class="over-btns"></div>';
+  const bt=box.querySelector('.over-btns');
+  const ok=el('button',okCls);ok.textContent=okLabel;ok.onclick=()=>doConfirm();
+  const no=el('button','btn');no.textContent=c.type==='quit'?'Seguir jugando':'Volver';no.onclick=()=>{G.confirm=null;G.mode=null;renderGame();};
+  bt.appendChild(ok);bt.appendChild(no);ov.appendChild(box);return ov;
+}
+function toggleLog(){G._showLog=!G._showLog;renderGame();}
+function mkLog(){
+  const w=el('div','log'+(G._showLog?' sheet':''));
+  const head=el('div','log-head');
+  const cl=el('button','btn icon sm');cl.innerHTML=ic('copy');cl.setAttribute('aria-label','Copiar registro');
+  cl.onclick=()=>{
+    const txt=G.log.slice().reverse().map(e=>e.msg.replace(/<[^>]+>/g,'')).join('\n');
+    const ok=()=>{cl.innerHTML=ic('check');setTimeout(()=>{cl.innerHTML=ic('copy');},1500);};
+    try{
+      if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(ok).catch(()=>{_copyFallback(txt);ok();});
+      else{_copyFallback(txt);ok();}
+    }catch(e){_copyFallback(txt);ok();}
+  };
+  head.innerHTML='<span class="grow">Registro</span>';head.appendChild(cl);
+  const cx=el('button','btn icon sm log-close');cx.innerHTML=ic('close');cx.setAttribute('aria-label','Cerrar');cx.onclick=()=>toggleLog();head.appendChild(cx);w.appendChild(head);
+  const body=el('div','log-body');
+  // G.log is newest-first; AI reasoning/debug entries stay in the log but are not shown to the player
+  body.innerHTML=G.log.filter(e=>e.type!=='ai-logic'&&e.type!=='ai-error').slice(0,40)
+    .map(e=>'<div class="log-entry'+(e.msg.indexOf('──')===0?' sep':'')+'">'+fmtLog(e.msg).replace(/^─+\s*|\s*─+$/g,'')+'</div>').join('');
+  body.addEventListener('mousedown',e=>e.stopPropagation());
+  body.addEventListener('click',e=>e.stopPropagation());
+  w.appendChild(body);return w;
+}
+function buildFullHistory(){
+  let txt='══ SPIRE ARENA — HISTORIAL COMPLETO ══\n';
+  txt+='P1 mazo: '+G.p1sel.map(id=>{const c=CARDS.find(x=>x.id===id);return c?c.name+' ('+typeInfo(c)+' '+kwStrDisplay(c)+')':'?';}).join(', ')+'\n';
+  txt+='IA mazo: (generado internamente)\n';
+  txt+='Ganador: '+(G.winner==='p1'?'JUGADOR':'IA')+'\n';
+  txt+='Acciones P1 al final: '+G.p1.actMax+' | IA al final: '+G.ai.actMax+'\n';
+  txt+='══ LOG COMPLETO ══\n';
+  const allLog=[...G.log].reverse();
+  txt+=allLog.map(e=>'  '+e.msg.replace(/<[^>]+>/g,'')).join('\n')+'\n';
+  txt+='══ HISTORIAL DE ACCIONES ══\n';
+  txt+='Formato: Turno | Actor | Acción | P1Templos | AITemplos | P1Act | AIAct | Tablero\n';
+  G.gameHistory.forEach(h=>{
+    txt+=`T${h.turn} | ${h.actor} | ${h.action}: ${h.detail} | P1=${h.p1hp} | AI=${h.aihp} | P1act=${h.p1act} | AIact=${h.aiact}\n`;
+    txt+='  Tablero: '+h.board+'\n';
+  });
+  return txt;
+}
+function _copyFallback(txt){
+  const ta=document.createElement('textarea');ta.value=txt;
+  ta.style.cssText='position:fixed;top:10px;left:10px;width:90vw;height:60vh;z-index:9999;font-size:11px;font-family:monospace';
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');}catch(e){}
+  setTimeout(()=>{if(ta.parentNode)document.body.removeChild(ta);},3000);
+}
+function copyHistory(){
+  const txt=buildFullHistory();
+  const b=document.getElementById('btn-copy-hist');
+  _copyFallback(txt);
+  if(b){b.innerHTML=ic('check')+'Copiado';setTimeout(()=>{b.innerHTML=ic('copy')+'Copiar historial';},2000);}
+}
+function renderGameOver(){
+  const draw=G.winner==='draw',win=G.winner==='p1';
+  showScreen('game-screen');
+  const gs=document.getElementById('game-screen');
+  _curPos={};_curHp={};_endKeys=computeEndKeys();
+  gs.innerHTML='';gs.appendChild(buildArena(false));
+  _prevPos=_curPos;_prevHp=_curHp;fitBoard();playFx();flashChanges();
+  if(G._overOpen===false)return;
+  const ov=el('div','over');
+  ov.innerHTML='<div class="over-box"><div class="over-mark '+(draw?'draw':win?'win':'lose')+'">'+ic(draw?'tie':win?'trophy':'cpu')+'</div>'
+    +'<div class="over-title">'+(draw?'Empate':win?'Ganaste':'Ganó la IA')+'</div>'
+    +'<div class="over-btns"></div></div>';
+  const btns=ov.querySelector('.over-btns');
+  const bv=el('button','btn primary');bv.innerHTML=ic('help')+'Ver tablero';bv.onclick=()=>{G._overOpen=false;renderGame();};
+  const br=el('button','btn');br.innerHTML=ic('refresh')+'Nueva partida';br.onclick=()=>restartGame();
+  const bc=el('button','btn');bc.id='btn-copy-hist';bc.innerHTML=ic('copy')+'Copiar historial';bc.onclick=()=>copyHistory();
+  btns.appendChild(bv);btns.appendChild(br);btns.appendChild(bc);
+  if(G._fxEnd>0){ov.style.display='none';setTimeout(()=>{ov.style.display='';},G._fxEnd+250);}
+  gs.appendChild(ov);
+}
+function showGameOver(){renderGameOver();}
+function restartGame(){_flash=null;G._overOpen=true;G.p1sel=[];G.phase='sel1';_lastCur=null;_prevPos={};_prevHp={};G_fType.clear();G_fSkill.clear();G._showLog=false;G_cardOrder=[...CARDS].sort((a,b)=>{const td=TYPE_ORDER.indexOf(a.type)-TYPE_ORDER.indexOf(b.type);return td!==0?td:_kwScore(b)-_kwScore(a);}).map(c=>c.id);buildSelGrid();showScreen('sel1-screen');window.scrollTo(0,0);}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');document.body.classList.toggle('in-game',id==='game-screen');}
+ICON_PATHS.filter='<path d="M4 5h16l-6.2 7.6V19l-3.6-1.8v-4.6z"/>';document.getElementById('brand-mark').innerHTML=ic('tower');document.getElementById('filter-btn').innerHTML=ic('filter')+'<span class="fbadge" id="fbadge"></span>';
+document.getElementById('opt-btn').innerHTML=ic('more');ICON_PATHS.play='<path d="M8 5.5v13l10.5-6.5z"/>';
+buildSortBar();buildDiffSeg();document.getElementById('btn-auto1').innerHTML=ic('refresh')+'<span class="lbl">Auto</span>';buildSelGrid();
+
+// ════ TOOLTIPS (hover en desktop, mantener apretado en mobile) ════
+const TT=document.createElement('div');TT.id='tt';document.body.appendChild(TT);
+let _ttTimer=null,_lpFired=0;
+function toastMs(html){return Math.min(9000,Math.max(3500,1800+html.replace(/<[^>]+>/g,'').length*45));}
+function ttShow(t,hold){
+  const h=t.getAttribute('data-tip');if(!h)return;
+  TT.innerHTML=h;TT.classList.add('on');TT.style.transform='';TT.style.opacity='';
+  const r=t.getBoundingClientRect(),w=TT.offsetWidth,hh=TT.offsetHeight;
+  let x=Math.min(Math.max(8,r.left+r.width/2-w/2),window.innerWidth-w-8);
+  let y=r.top-hh-8;if(y<8)y=Math.min(r.bottom+8,window.innerHeight-hh-8);
+  TT.style.left=x+'px';TT.style.top=y+'px';
+  clearTimeout(TT._timer);
+  if(!hold)TT._timer=setTimeout(ttHide,toastMs(h));   // seguro por si el elemento desaparece
+}
+TT._pause=()=>clearTimeout(TT._timer);
+TT._rearm=ms=>{clearTimeout(TT._timer);TT._timer=setTimeout(ttHide,ms);};
+TT._dismiss=(fast,dir)=>{
+  clearTimeout(TT._timer);TT._offAt=Date.now();
+  if(dir){TT.style.transform='translateX('+(dir*110)+'%)';TT.style.opacity='0';setTimeout(ttHide,230);}else ttHide();
+};
+function attachSwipe(t){
+  let x0=null,dx=0,moved=false,t0=0;
+  const rearm=ms=>t._rearm(ms);
+  // mantener apretado (o el mouse encima) pausa el cierre para poder leerlo
+  t.addEventListener('pointerdown',e=>{x0=e.clientX;dx=0;moved=false;t0=Date.now();t._pause();try{t.setPointerCapture(e.pointerId);}catch(_){}t.style.transition='none';});
+  t.addEventListener('pointermove',e=>{if(x0===null)return;dx=e.clientX-x0;if(Math.abs(dx)>6)moved=true;t.style.transform='translateX('+dx+'px)';t.style.opacity=String(Math.max(.25,1-Math.abs(dx)/220));});
+  const end=()=>{
+    if(x0===null)return;const d=dx,held=Date.now()-t0;x0=null;t.style.transition='';
+    if(Math.abs(d)>60)t._dismiss(false,d>0?1:-1);
+    else if(!moved&&held<350)t._dismiss();              // toque corto: cerrar
+    else{t.style.transform='';t.style.opacity='';rearm(3500);} // mantenido: queda abierto un rato más
+  };
+  t.addEventListener('pointerup',end);t.addEventListener('pointercancel',end);
+  t.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')t._pause();});
+  t.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'&&x0===null&&!t._gone)rearm(2500);});
+}
+function ttHide(){TT.classList.remove('on');TT.style.transform='';TT.style.opacity='';}
+attachSwipe(TT);
+const tipOf=e=>e.target.closest&&e.target.closest('[data-tip]');
+// mouse: queda abierto mientras estés encima (de la carta o del cuadro) y se cierra solo un rato después de salir
+document.addEventListener('pointerover',e=>{if(e.pointerType!=='mouse'||(e.target.closest&&e.target.closest('#tt')))return;const t=tipOf(e);if(t){if(Date.now()-(TT._offAt||0)>400)ttShow(t,true);}else if(TT.classList.contains('on'))TT._rearm(2500);});
+document.addEventListener('pointerout',e=>{if(e.pointerType!=='mouse'||!TT.classList.contains('on'))return;const to=e.relatedTarget;if(to&&to.closest&&to.closest('#tt'))return;TT._rearm(2500);});
+// touch: mantener apretado abre; al soltar queda abierto el tiempo de lectura; tocar fuera lo cierra
+document.addEventListener('touchstart',e=>{
+  if(e.target.closest&&e.target.closest('#tt'))return;
+  const t=tipOf(e);clearTimeout(_ttTimer);
+  if(!t){if(TT.classList.contains('on'))ttHide();return;}
+  _ttTimer=setTimeout(()=>{ttShow(t,true);_lpFired=Date.now();if(navigator.vibrate)try{navigator.vibrate(15);}catch(_){}},420);
+},{passive:true});
+['touchend','touchmove','touchcancel'].forEach(ev=>document.addEventListener(ev,e=>{
+  clearTimeout(_ttTimer);
+  if(ev==='touchend'&&TT.classList.contains('on')&&!(e.target.closest&&e.target.closest('#tt')))TT._rearm(toastMs(TT.innerHTML));
+},{passive:true}));
+document.addEventListener('click',e=>{if(Date.now()-_lpFired<700){e.stopPropagation();e.preventDefault();}},true);
+document.addEventListener('contextmenu',e=>{if(e.target.closest&&e.target.closest('[data-tip]'))e.preventDefault();});
+try{window._muted=localStorage.getItem('spire-mute')==='1';}catch(e){}
+</script>
+</body>
+</html>
