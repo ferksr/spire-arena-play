@@ -782,6 +782,13 @@ button{font-family:inherit;color:inherit}
 #sel1-screen.active{bottom:auto;height:var(--app-h)}
 .tut-dots{min-width:0}
 @media(max-width:480px){.tut-dots{display:none}.tut-nav{gap:8px}.tut-nav .btn{flex:1;justify-content:center;min-width:0}}
+
+/* bienvenida: una sola vez, fácil de descartar */
+.welcome-box{max-width:400px;padding:22px 24px 20px}
+.welcome-box .modal-head h2{font-size:20px}
+.welcome-box p{color:var(--ink-2);font-size:14px;line-height:1.5;margin:4px 0 16px}
+.welcome-act{display:flex;gap:10px;justify-content:flex-end}
+@media(max-width:480px){.welcome-act .btn{flex:1;justify-content:center}}
 /* v17: celulares en horizontal (alto <= 500): selección en 7 columnas y juego con el tablero a la izquierda */
 @media(orientation:landscape) and (max-height:500px){
   .sel-top{padding:4px 12px 0;flex-shrink:0}.brand-mark{width:22px;height:22px;border-radius:7px}.brand-mark .ic{font-size:13px}.brand-name{font-size:11px}
@@ -852,6 +859,11 @@ button{font-family:inherit;color:inherit}
   </div></div>
 </div>
 <div id="game-screen" class="screen"></div>
+<div id="welcome-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="welcome-t"><div class="modal-box welcome-box">
+  <div class="modal-head"><h2 id="welcome-t">Bienvenido a Spire Arena</h2><button class="btn icon sm" id="welcome-x" aria-label="Cerrar"></button></div>
+  <p>¿Primera vez? El tutorial te muestra cómo se juega, paso a paso. Después lo encontrás en Opciones → Reglas.</p>
+  <div class="welcome-act"><button class="btn" id="welcome-no">Ahora no</button><button class="btn primary" id="welcome-yes">Ver tutorial</button></div>
+</div></div>
 <div id="tut-modal" class="modal"><div class="modal-box tut-box" id="tut-box"></div></div>
 <div id="rules-modal" class="modal" onclick="if(event.target===this)closeRules()"><div class="modal-box" id="rules-box"></div></div>
 <script>
@@ -2773,6 +2785,25 @@ setAppH();
 window.addEventListener('resize',setAppHSoon);window.addEventListener('orientationchange',setAppHSoon);window.addEventListener('pageshow',setAppHSoon);window.addEventListener('focus',setAppHSoon);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)setAppHSoon();});
 if(window.visualViewport)window.visualViewport.addEventListener('resize',setAppHSoon);
+
+// Bienvenida: solo la primera vez. Se marca como vista apenas se decide mostrarla (cualquier forma de cerrarla o recargar ya no la repite);
+// si el navegador no puede guardar el dato, no se muestra nunca.
+function welcomeInit(){
+  try{
+    const K='spire-welcome-seen';
+    if(localStorage.getItem(K)||localStorage.getItem('spire-diff'))return;
+    localStorage.setItem(K,'1');if(localStorage.getItem(K)!=='1')return;
+    const m=document.getElementById('welcome-modal');if(!m)return;
+    document.getElementById('welcome-x').innerHTML=ic('close');
+    const close=()=>{m.classList.remove('open');document.removeEventListener('keydown',onKey);};
+    const onKey=e=>{if(e.key==='Escape')close();};
+    document.getElementById('welcome-x').onclick=close;document.getElementById('welcome-no').onclick=close;
+    document.getElementById('welcome-yes').onclick=()=>{close();openTutorial();};
+    m.addEventListener('click',e=>{if(e.target===m)close();});
+    setTimeout(()=>{const sc=document.getElementById('sel1-screen');if(!sc||!sc.classList.contains('active'))return;m.classList.add('open');document.addEventListener('keydown',onKey);},600);
+  }catch(e){}
+}
+welcomeInit();
 try{window._muted=localStorage.getItem('spire-mute')==='1';}catch(e){}
 </script>
 </body>
