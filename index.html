@@ -624,7 +624,8 @@ button{font-family:inherit;color:inherit}
 .tut-box{max-width:460px;padding:22px 22px 18px}
 .tut-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .tut-count{font-size:12px;font-weight:600;color:var(--ink-3);letter-spacing:.08em;text-transform:uppercase}
-.tut-scene{display:flex;justify-content:center;align-items:center;min-height:196px;margin:2px 0 14px}
+.tut-scene{display:flex;justify-content:center;align-items:center;height:360px;margin:2px 0 14px}
+.tut-text{min-height:122px}@media(max-width:420px){.tut-text{min-height:146px}}@media(max-width:350px){.tut-text{min-height:170px}}
 .tut-box h2{font-family:var(--display);font-size:20px;font-weight:600;margin-bottom:6px}
 .tut-box p{color:var(--ink-2);font-size:14px;line-height:1.5}
 .tut-box p b{color:var(--ink);font-weight:600}
@@ -647,7 +648,7 @@ button{font-family:inherit;color:inherit}
 .tut-pn .acts{font-size:13px}
 .tut-end{display:grid;gap:8px;justify-items:center;color:var(--ink-2);text-align:center}
 .tut-end .ic{font-size:44px;color:var(--cyan-d)}
-@media(max-width:700px){#btn-tut-sel .lbl{display:none}#btn-tut-sel{padding:7px 10px}.tut-box{padding:18px 16px 14px}.tut-scene{min-height:186px}}
+@media(max-width:700px){#btn-tut-sel .lbl{display:none}#btn-tut-sel{padding:7px 10px}.tut-box{padding:18px 16px 14px}.tut-scene{height:360px}}
 /* v10: encabezado centrado, título + dificultad + reglas en una línea, filtros más bajos, detalle flotante */
 .sel-top{justify-content:center}
 .brand-name{font-size:17px}.brand-mark{width:38px;height:38px}
@@ -850,9 +851,9 @@ const TYPE_NAME={water:'Agua',fire:'Fuego',metal:'Metal',plant:'Planta',earth:'T
 const SKILLS=['charge','S','B','ranged','combo','blast'];
 const SKILL_NAME={charge:'Carga',S:'Flanquea',B:'Retrocede',ranged:'Disparo',combo:'Combo',blast:'Blast'};
 const SKILL_INFO={
-  charge:'Hasta 2 pasos por acción, cada uno en una dirección que permita la carta. El 1.º va a una celda libre; el 2.º, a una libre o contra un rival (carta o templo), sin combo.',
+  charge:'Se mueve hasta 2 pasos por acción, o hasta que ataque.',
   S:'Puede mover y atacar a los costados.',
-  B:'Puede mover y atacar hacia atrás (no a templos).',
+  B:'Puede mover y atacar hacia atrás.',
   ranged:'En vez de mover, dispara en línea recta, en las direcciones en que la carta puede moverse, a la 1.ª carta que encuentre. Solo se puede disparar a una carta rival cuyo tipo no venza al del tirador, y la mata. Ignora Blast y no daña templos. El tirador no se mueve ni corre riesgo. Las cartas propias, las ruinas y los templos tapan el tiro.',
   combo:'Tras ganar un combate puede atacar otra carta o templo vecino, en las direcciones de la carta y sin gastar otra acción. Se repite mientras gane; termina si empata, pierde, hay Blast o golpea un templo.',
   blast:'Todo combate cuerpo a cuerpo en que participe (atacando o defendiendo) manda a ambas cartas al descarte, sin mirar los tipos.'
@@ -943,14 +944,14 @@ function openRules(){
     +sec(1,'Objetivo','<p>Destruí el templo <b>Central</b> rival (3 vidas) <b>o</b> sus dos templos <b>Chicos</b> (2 vidas cada uno). Perdés si eso les pasa a los tuyos, incluso por reponer.</p>')
     +sec(2,'Preparación','<p>Elegí <b>8 de las 20 cartas</b>: se mezclan y robás 4. Empieza uno al azar. Tenés <b>1 acción</b> por turno.</p>')
     +sec(3,'La carta','<div class="rule-card"><div class="t-'+demo.type+'" style="width:112px;flex:none">'+cardHTML(demo,'hand')+'</div><ul class="steps" style="list-style:none;padding:0"><li><b>Círculo:</b> su tipo.</li><li><b>Espadas:</b> los tipos a los que vence.</li><li><b>Íconos de abajo:</b> sus skills (sección 7).</li></ul></div>')
-    +sec(4,'Tu turno','<p>Gastá <b>todas</b> tus acciones, una por una. No se puede pasar: si solo te queda reponer, reponés; si no hay ninguna jugada posible, el turno termina solo. Al terminar robás hasta tener 4 cartas (mientras haya mazo).</p><div class="acts-list">'
+    +sec(4,'Tu turno','<p>Gastá <b>todas</b> tus acciones, una por una. No se puede pasar: si solo te queda reponer, reponés; si no hay ninguna jugada posible, el turno termina solo. Al terminar, reponés hasta tener 4 cartas (mientras haya mazo).</p><div class="acts-list">'
       +act('deck','Desplegar','una carta de tu mano a una celda de tu <b>fila de despliegue</b> (la pegada a tus templos), libre o con una carta rival, que se combate.')
-      +act('F','Mover o atacar','una carta tuya da 1 paso hacia el rival. Si ahí hay una carta rival, la atacás; si hay un templo rival, lo golpeás. No se entra a celdas con cartas propias ni ruinas.')
+      +act('F','Mover o atacar','una carta tuya puede avanzar 1 paso hacia el rival. Si ahí hay una carta rival, la atacás; si hay un templo rival, lo golpeás. No se entra a celdas con cartas propias ni ruinas.')
       +act('ranged','Disparar','solo cartas con Disparo.')
       +act('refresh','Reponer','el descarte se mezcla con el mazo, completás la mano a 4 al instante y un templo tuyo, a tu elección, pierde 1 vida.')
       +'</div>')
-    +sec(5,'Combate','<p>Decide el <b>tipo</b>. El ganador queda en la celda del defensor y el perdedor va al <b>descarte</b>. Mismo tipo: empate, ambas al descarte (salvo Blast, sección 7).</p><div class="beat-list">'+beats+'</div>')
-    +sec(6,'Templos','<p>Cada golpe le saca <b>1 vida</b> y la carta que golpea va al descarte. Un templo sin vidas queda en <b>ruinas</b> y no se puede cruzar. Cada vez que un templo tuyo pierde una vida (golpe o reponer) ganás <b>+1 acción por turno</b>, desde tu próximo turno y para siempre.</p>')
+    +sec(5,'Combate','<p>El resultado lo define el <b>tipo</b>. El ganador queda en la celda del defensor y el perdedor va al <b>descarte</b>. Mismo tipo: empate, ambas al descarte (salvo Blast, sección 7).</p><div class="beat-list">'+beats+'</div>')
+    +sec(6,'Templos','<p>Cada golpe le saca <b>1 vida</b> y la carta que golpea va al descarte. Un templo sin vidas queda en <b>ruinas</b> y no se puede cruzar. Cada vida que pierde un templo (por golpe o por reponer) le da a su dueño <b>+1 acción por turno</b>, desde su próximo turno y para siempre.</p>')
     +sec(7,'Skills','<div class="skill-list">'+sk+'</div>');
   document.getElementById('rules-modal').classList.add('open');
 }
@@ -986,19 +987,19 @@ function tutSteps(){
   return TUT.steps=[
     {t:'Objetivo',x:'Destruí el templo <b>Central</b> rival (3 vidas) <b>o</b> sus dos templos <b>Chicos</b> (2 vidas cada uno). Perdés si eso les pasa a los tuyos.',
       scene:board([base(),[...base([2,0,2]),{k:'ruin',r:0,c:1}]])},
-    {t:'Elegí tu mazo',x:'Tocá <b>8 de las 20 cartas</b>, o usá <b>Auto</b> para un mazo bueno y distinto cada vez. Los filtros de tipo y skill ayudan a buscar. Arriba a la derecha elegís la <b>dificultad</b>.',custom:'deck'},
+    {t:'Elegí tu mazo',x:'Tocá <b>8 de las 20 cartas</b>, o usá <b>Auto</b> para un mazo bueno y distinto cada vez. Los filtros de tipo y skill ayudan a buscar. Arriba, en el centro, elegís la <b>dificultad</b>.',custom:'deck'},
     {t:'La carta',x:'Cada carta tiene un <b>tipo</b> (el círculo), los tipos a los que <b>vence</b> (las espadas) y sus <b>skills</b> (los íconos de abajo). Mantené apretada o pasá el mouse para ver detalles.',custom:'card'},
     {t:'Tipos',x:'En un combate gana el tipo que vence al otro. <b>Mismo tipo: empate</b> y las dos cartas van al descarte.',custom:'types'},
-    {t:'Tu turno',x:'Tenés <b>acciones</b> por turno (empezás con 1). Cada jugada gasta una y el contador <b>destella</b>. No se puede pasar el turno. Al terminar robás hasta tener 4 cartas.',custom:'turn'},
+    {t:'Tu turno',x:'Tenés <b>acciones</b> por turno (empezás con 1). Cada jugada gasta una. No se puede pasar el turno. Al terminar, reponés hasta tener 4 cartas.',custom:'turn'},
     {t:'Desplegar',x:'Tocá una carta de tu mano y después una celda marcada de tu <b>fila de despliegue</b>, la pegada a tus templos.',
       scene:board([[...base(),H(3,0,'vmove'),H(3,1,'vmove'),H(3,2,'vmove')],[...base(),P(3,1,water,true)]])},
-    {t:'Avanzar',x:'Tocá una carta tuya del tablero y una celda marcada. Todas las cartas avanzan <b>1 paso</b> hacia el rival.',
+    {t:'Avanzar',x:'Tocá una carta tuya del tablero y una celda marcada. Las cartas pueden avanzar <b>1 paso</b> hacia el rival.',
       scene:board([[...base(),P(3,1,water),H(2,1,'vmove')],[...base(),P(2,1,water)]],[null,()=>fxSlide(M(water,'p1'),3,1,2,1)])},
-    {t:'Atacar',x:'Si la celda marcada en rojo tiene un rival, lo atacás: <b>decide el tipo</b>. El ganador ocupa la celda y el perdedor va al descarte.',
+    {t:'Atacar',x:'Si la celda marcada en rojo tiene un rival, lo atacás. <b>El resultado lo define el tipo</b>: el ganador ocupa la celda y el perdedor va al descarte.',
       scene:board([[...base(),P(2,1,water),E(1,1,fire),H(1,1,'vattk')],[...base(),P(1,1,water)]],[null,()=>fxClash('A',M(water,'p1'),M(fire,'ai'),2,1,1,1)])},
-    {t:'Skill: Carga',x:'La Carga da <b>hasta 2 pasos</b> por acción. El 1.º va a una celda libre; el 2.º, a una libre o a atacar (sin combo).',
+    {t:'Skill: Carga',x:'La Carga se mueve <b>hasta 2 pasos</b> por acción, o hasta que ataque.',
       scene:board([[...base(),P(3,1,car),H(2,1,'vmove'),H(1,1,'vmove')],[...base(),P(1,1,car)]],[null,()=>fxSlide(M(car,'p1'),3,1,1,1)])},
-    {t:'Skills: Flanquea y Retrocede',x:'<b>Flanquea</b> permite mover y atacar a los costados; <b>Retrocede</b>, hacia atrás (pero no a templos). Los pasos de cada carta son los que marca su skill.',
+    {t:'Skills: Flanquea y Retrocede',x:'<b>Flanquea</b> permite mover y atacar a los costados; <b>Retrocede</b>, hacia atrás. Los pasos de cada carta son los que marca su skill.',
       scene:board([[...base(),P(2,1,sb),H(1,1,'vmove'),H(2,0,'vmove'),H(2,2,'vmove'),H(3,1,'vmove')]])},
     {t:'Skill: Disparo',x:'En vez de mover, <b>dispara en línea recta</b> a la primera carta que encuentre (en las direcciones en que la carta puede moverse). La mata salvo que su tipo venza al tuyo. <b>No daña templos</b>.',
       scene:board([[...base(),P(3,1,rng),E(1,1,e1),H(1,1,'vranged')],[...base(),P(3,1,rng)]],[null,()=>{fx({k:'shot',fr:3,fc:1,tr:1,tc:1,tn:'win',dur:260});fx({k:'ghost',g:ghostOf(M(e1,'ai')),r:1,c:1,dieAt:260,tn:'win'});fx({k:'burst',r:1,c:1,icon:'ranged',tn:'win',at:260});}])},
@@ -1006,10 +1007,10 @@ function tutSteps(){
       scene:board([[...base(),P(3,1,cmb),E(2,1,ce[0]),E(1,1,ce[ce.length-1]),H(2,1,'vattk')],[...base(),P(2,1,cmb),E(1,1,ce[ce.length-1]),H(1,1,'vattk')],[...base(),P(1,1,cmb)]],[null,()=>fxClash('A',M(cmb,'p1'),M(ce[0],'ai'),3,1,2,1),()=>fxClash('A',M(cmb,'p1'),M(ce[ce.length-1],'ai'),2,1,1,1)])},
     {t:'Skill: Blast',x:'Si una carta con <b>Blast</b> participa en un combate cuerpo a cuerpo, <b>ambas cartas van al descarte</b>, sin mirar los tipos.',
       scene:board([[...base(),P(3,1,bl),E(2,1,fire),H(2,1,'vattk')],[...base()]],[null,()=>fxClash('blast',M(bl,'p1'),M(fire,'ai'),3,1,2,1)])},
-    {t:'Atacar templos',x:'Atacar un templo le saca <b>1 vida</b> y tu carta va al descarte. Sin vidas queda en ruinas. Cada golpe a un templo te da, a su dueño, <b>+1 acción por turno</b> para siempre.',
+    {t:'Atacar templos',x:'Atacar un templo le saca <b>1 vida</b> y tu carta va al descarte. Sin vidas queda en ruinas. Cada vida que pierde un templo le da a su dueño <b>+1 acción por turno</b>, para siempre.',
       scene:board([[...base(),P(1,1,water),H(0,1,'vattk-temple')],[...base([2,2,2],1)]],[null,()=>{const d=fxSlide(M(water,'p1'),1,1,0,1);fxSeq(d);fx({k:'burst',r:0,c:1,icon:'temple',tn:'win',at:0});fx({k:'float',r:0,c:1,text:'−1',tn:'win',at:120});}])},
-    {t:'Reponer',x:'Si te quedás sin cartas, <b>Reponer</b> (1 acción): el descarte vuelve al mazo, completás la mano a 4 y un templo tuyo, a tu elección, <b>pierde 1 vida</b>. Es obligatorio si no tenés otra jugada.',custom:'repo'},
-    {t:'¡A jugar!',x:'Ganás destruyendo templos. Probá <b>Fácil</b> para empezar y usá <b>Auto</b> para armar el mazo. Podés volver a ver este tutorial desde <b>Tutorial</b> o repasar las <b>Reglas</b>.',custom:'end'}
+    {t:'Reponer',x:'Podés <b>reponer</b> (1 acción): el descarte vuelve al mazo, completás la mano a 4 y un templo tuyo, a tu elección, <b>pierde 1 vida</b>. Es obligatorio si no tenés otra jugada.',custom:'repo'},
+    {t:'¡A jugar!',x:'Ganás destruyendo templos. Probá <b>Fácil</b> para empezar y usá <b>Auto</b> para armar el mazo. Podés volver a ver este tutorial desde <b>Opciones → Reglas</b>.',custom:'end'}
   ];
 }
 function tutCustom(kind,f){
@@ -1036,7 +1037,7 @@ function tutRender(){
   const steps=tutSteps(),st=steps[TUT.i],box=document.getElementById('tut-box');
   clearTimeout(TUT.timer);TUT.f=0;
   box.innerHTML='<div class="tut-top"><span class="tut-count">Paso '+(TUT.i+1)+' de '+steps.length+'</span><button class="btn icon sm" onclick="closeTutorial()" aria-label="Cerrar tutorial">'+ic('close')+'</button></div>'
-    +'<div class="tut-scene" id="tut-scene"></div><h2>'+st.t+'</h2><p>'+st.x+'</p>'
+    +'<div class="tut-scene" id="tut-scene"></div><div class="tut-text"><h2>'+st.t+'</h2><p>'+st.x+'</p></div>'
     +'<div class="tut-nav"><button class="btn sm" id="tut-prev" onclick="tutGo(-1)"'+(TUT.i?'':' disabled')+'>'+ic('left')+'Anterior</button><div class="tut-dots">'+steps.map((_,i)=>'<i class="'+(i===TUT.i?'on':'')+'"></i>').join('')+'</div><button class="btn sm primary" onclick="'+(TUT.i===steps.length-1?'closeTutorial()':'tutGo(1)')+'">'+(TUT.i===steps.length-1?'Listo':'Siguiente'+ic('right'))+'</button></div>';
   const paint=()=>{const sc=document.getElementById('tut-scene');if(!sc)return;sc.innerHTML='';
     if(st.custom)sc.appendChild(tutCustom(st.custom,TUT.f));
@@ -1234,7 +1235,7 @@ function validMoveCells(r,c,who){
     const t=G.board[tr][tc];
     if(!t){
       add(tr,tc,'move');
-      // Carga: un 2.º paso por acción, en cualquier dirección que permita la carta; si ahí hay un rival lo ataca (sin combo)
+      // Carga: un 2.º paso por acción, en cualquier dirección que permita la carta; si ahí hay un rival lo ataca
       if(isCharge)for(const[er,ec]of dirs){
         const xr=tr+er,xc=tc+ec;if(!inB(xr,xc)||isRuin(xr,xc)||(xr===r&&xc===c))continue;
         const x=G.board[xr][xc];
@@ -1372,8 +1373,7 @@ function doMove(fr,fc,tr,tc,who){
     return'ok';}
   else if(tgt.t==='card'){
     const outcome=applyMelee(mover,tgt,fr,fc,tr,tc);
-    const step2=Math.abs(tr-fr)+Math.abs(tc-fc)>1;   // ataque de Carga a 2 pasos: no hace combo
-    if(outcome==='win'&&who==='p1'&&!step2){const cts=findComboTargets(mover,tr,tc);if(cts.length){G.comboPending={winner:mover,wr:tr,wc:tc,targets:cts};return'combo';}else if(hK(mover.cd,'combo'))comboNoTargets(mover);}
+    if(outcome==='win'&&who==='p1'){const cts=findComboTargets(mover,tr,tc);if(cts.length){G.comboPending={winner:mover,wr:tr,wc:tc,targets:cts};return'combo';}else if(hK(mover.cd,'combo'))comboNoTargets(mover);}
     return outcome;
   }else if(tgt.t==='temple'){fxSeq(fxSlide(mover,fr,fc,tr,tc));G.board[fr][fc]=null;hitTemple(tr,tc,mover);return'ok';}
   return'ok';
@@ -1385,7 +1385,7 @@ function doDeploy(handIdx,r,c,who){
     p.hand.splice(handIdx,1);log('👊 <b>'+ci.cd.name+'</b> baja sobre <b>'+tgt.cd.name+'</b> en '+pos(r,c)+'!');
     const outcome=applyMelee(ci,tgt,-1,-1,r,c);
     if(outcome==='win'&&who==='p1'){const cts=findComboTargets(ci,r,c);if(cts.length){G.comboPending={winner:ci,wr:r,wc:c,targets:cts};return'combo';}else if(hK(ci.cd,'combo'))comboNoTargets(ci);}
-    return'normal';
+    return outcome==='win'?'win':'normal';
   }
   if(tgt)return'fail';
   G.board[r][c]=ci;p.hand.splice(handIdx,1);
@@ -1476,10 +1476,10 @@ function clearSel(){G.sel=null;G.validCells=[];G.rangedMode=false;renderGame();}
 // ════ PERSONALIDADES OCULTAS ════
 // Cada partida la IA toma una personalidad al azar (el jugador no la ve). Dentro de ella varía levemente sus pesos,
 // su sesgo de tipo en el mazo y, en cada turno, su estilo; además explora jugadas alternativas parecidas.
-const PERSONAS={"agresiva":{"ai":{"actVal":8.25,"card":2.61,"hand":0.17,"adv":11.99,"lane":24.26,"deployRisk":0.12,"tpScale":1982.63,"cycle":1.7,"explore":0.19},"deck":{"charge":5.92,"ranged":2.45,"S":2.54,"combo":0.42,"blast":0,"B":0.91,"noise":3.07}},"defensiva":{"ai":{"actVal":33,"card":6.6,"hand":1.55,"adv":4.44,"lane":11.71,"deployRisk":11.88,"tpScale":498.77,"cycle":8.5,"explore":0.08},"deck":{"charge":6.7,"ranged":2.11,"S":2.82,"combo":1.67,"blast":1.5,"B":1.02,"noise":1.74}},"equilibrada":{"ai":{"actVal":73.1,"card":1.1,"hand":1,"adv":12.62,"lane":11.6,"deployRisk":0.43,"tpScale":825,"cycle":5.1,"explore":0.06},"deck":{"charge":8.29,"ranged":0.78,"S":2.9,"combo":3.55,"blast":0.83,"B":0.08,"noise":1}},"artillera":{"ai":{"actVal":20.08,"card":4.4,"hand":1.15,"adv":6.24,"lane":12.01,"deployRisk":4.65,"tpScale":994.89,"cycle":1.96,"explore":0.11},"deck":{"charge":6.54,"ranged":2.43,"S":2.07,"combo":0.52,"blast":0.62,"B":2.34,"noise":2.4}},"temeraria":{"ai":{"actVal":12.21,"card":1.7,"hand":0.61,"adv":14,"lane":35.34,"deployRisk":0.15,"tpScale":1418.27,"cycle":0.27,"explore":0.28},"deck":{"charge":7.9,"ranged":1.88,"S":1.58,"combo":1.57,"blast":2.77,"B":2,"noise":3.78}},"cautelosa":{"ai":{"actVal":56.09,"card":6.63,"hand":2.4,"adv":4.43,"lane":3.3,"deployRisk":15.01,"tpScale":657.05,"cycle":9.72,"explore":0.05},"deck":{"charge":4.61,"ranged":2.38,"S":1.92,"combo":2.28,"blast":0,"B":1.48,"noise":1.97}}};
+const PERSONAS={"agresiva":{"ai":{"actVal":8.25,"card":2.61,"hand":0.17,"adv":11.99,"lane":24.26,"deployRisk":0.12,"tpScale":1982.63,"cycle":1.7,"explore":0.19},"deck":{"charge":5.92,"ranged":2.45,"S":2.54,"combo":0.42,"blast":0,"B":0.91,"noise":3.07}},"defensiva":{"ai":{"actVal":57.33,"card":7.87,"hand":3.4,"adv":4.41,"lane":13.46,"deployRisk":13.6,"tpScale":540.6,"cycle":8.5,"explore":0.1},"deck":{"charge":7.31,"ranged":2.22,"S":2.55,"combo":0.47,"blast":0,"B":0.57,"noise":1.16}},"equilibrada":{"ai":{"actVal":73.1,"card":1.1,"hand":0.43,"adv":13.26,"lane":12.6,"deployRisk":0.49,"tpScale":825,"cycle":4.61,"explore":0.11},"deck":{"charge":7.75,"ranged":2.05,"S":4.8,"combo":5,"blast":0.93,"B":1.17,"noise":1.19}},"artillera":{"ai":{"actVal":33.58,"card":5.1,"hand":1.7,"adv":6.05,"lane":5.5,"deployRisk":2.58,"tpScale":660,"cycle":1.65,"explore":0.05},"deck":{"charge":9.13,"ranged":1.25,"S":2.12,"combo":0.16,"blast":0.14,"B":1.94,"noise":1}},"temeraria":{"ai":{"actVal":13.13,"card":1.7,"hand":0.47,"adv":8.06,"lane":37.27,"deployRisk":0.09,"tpScale":2000,"cycle":0.25,"explore":0.3},"deck":{"charge":7.8,"ranged":0.71,"S":1.34,"combo":0.07,"blast":4,"B":2.07,"noise":3.84}},"cautelosa":{"ai":{"actVal":87.8,"card":5.5,"hand":3.19,"adv":5.56,"lane":4.98,"deployRisk":12.91,"tpScale":613.67,"cycle":5.11,"explore":0.05},"deck":{"charge":4.43,"ranged":1.24,"S":1.17,"combo":0,"blast":1.89,"B":1.43,"noise":2.6}}};
 // Dificultad: cuánto busca la IA, cuánto se equivoca a propósito y qué tan bueno es su mazo
 const DIFF_PRESETS={
-  easy:{beam:2,depth:2,budgetMs:120,explore:0.45,exploreTol:400,noise:8},
+  easy:{beam:2,depth:2,budgetMs:120,explore:0.55,exploreTol:400,noise:10},
   normal:{beam:12,depth:3,budgetMs:400,explore:0.2,exploreTol:80,second:true},
   hard:{beam:24,depth:5,budgetMs:1200,explore:0,exploreTol:80,noise:0,persona:'equilibrada'}
 };
@@ -1902,9 +1902,9 @@ function aiCheckCombo(wr,wc,who){
 }
 function aiExecuteAction(action){
   switch(action.type){
-    case'move':case'attack':case'attack_temple':doMove(action.fr,action.fc,action.tr,action.tc,'ai');if(Math.abs(action.tr-action.fr)+Math.abs(action.tc-action.fc)===1)aiCheckCombo(action.tr,action.tc);break;
+    case'move':case'attack':case'attack_temple':if(doMove(action.fr,action.fc,action.tr,action.tc,'ai')==='win')aiCheckCombo(action.tr,action.tc);break;
     case'ranged':doRanged(action.fr,action.fc,action.tr,action.tc);break;
-    case'deploy':case'deploy_combat':{doDeploy(action.handIdx,action.tr,action.tc,'ai');aiCheckCombo(action.tr,action.tc);break;}
+    case'deploy':case'deploy_combat':{if(doDeploy(action.handIdx,action.tr,action.tc,'ai')==='win')aiCheckCombo(action.tr,action.tc);break;}
     case'repo':payLife('ai',action.col);break;
     case'end_turn':G.ai.actLeft=0;break;
   }
@@ -1942,12 +1942,12 @@ function simWith(state,fn){
 function applyAction(who,a){
   G.comboPending=null;
   switch(a.type){
-    case'move':case'attack':case'attack_temple':doMove(a.fr,a.fc,a.tr,a.tc,who);G.comboPending=null;if(G.phase!=='over'&&Math.abs(a.tr-a.fr)+Math.abs(a.tc-a.fc)===1)aiCheckCombo(a.tr,a.tc,who);break;
+    case'move':case'attack':case'attack_temple':const mr=doMove(a.fr,a.fc,a.tr,a.tc,who);G.comboPending=null;if(G.phase!=='over'&&mr==='win')aiCheckCombo(a.tr,a.tc,who);break;
     case'ranged':doRanged(a.fr,a.fc,a.tr,a.tc);break;
     case'repo':payLife(who,a.col);break;
     case'deploy':case'deploy_combat':{
-      doDeploy(a.handIdx,a.tr,a.tc,who);G.comboPending=null;
-      if(G.phase!=='over')aiCheckCombo(a.tr,a.tc,who);break;}
+      const dr=doDeploy(a.handIdx,a.tr,a.tc,who);G.comboPending=null;
+      if(G.phase!=='over'&&dr==='win')aiCheckCombo(a.tr,a.tc,who);break;}
   }
   
 }
