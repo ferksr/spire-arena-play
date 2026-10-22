@@ -1032,6 +1032,7 @@ function buildSelGrid(){
   updateSelUI();
 }
 function openRules(){
+  ttHide();
   const beats=['water','fire','metal','plant','earth'].map(t=>'<div class="beat-item t-'+t+'"><div class="bh">'+ic(t)+TYPE_NAME[t]+'</div>'+TYPE_BEATS[t].map(b=>'<div class="bl">'+ic('swords')+'<span>'+(BEAT_PHRASE[t][b][0].toUpperCase()+BEAT_PHRASE[t][b].slice(1))+'</span></div>').join('')+'</div>').join('');
   const sk=SKILLS.map(k=>'<div class="sk-row">'+ic(k)+'<div><strong>'+SKILL_NAME[k]+'</strong><span>'+SKILL_INFO[k]+'</span></div></div>').join('');
   const act=(icn,t,d)=>'<div class="act-row">'+ic(icn)+'<div><b>'+t+'.</b> '+d+'</div></div>';
@@ -1150,7 +1151,7 @@ function tutRender(){
   if(n>1)tick();
 }
 function tutGo(d){const n=tutSteps().length;TUT.i=Math.max(0,Math.min(n-1,TUT.i+d));tutRender();}
-function openTutorial(){TUT.i=0;tutRender();document.getElementById('tut-modal').classList.add('open');}
+function openTutorial(){ttHide();TUT.i=0;tutRender();document.getElementById('tut-modal').classList.add('open');}
 function closeTutorial(){clearTimeout(TUT.timer);document.getElementById('tut-modal').classList.remove('open');}
 document.addEventListener('keydown',e=>{if(!document.getElementById('tut-modal').classList.contains('open'))return;if(e.key==='Escape')closeTutorial();else if(e.key==='ArrowRight')tutGo(1);else if(e.key==='ArrowLeft')tutGo(-1);});
 document.getElementById('tut-modal').addEventListener('click',e=>{if(e.target.id==='tut-modal')closeTutorial();});
@@ -2649,7 +2650,7 @@ function mkConfirm(){
   const no=el('button','btn');no.textContent=c.type==='quit'?'Seguir jugando':'Volver';no.onclick=()=>{G.confirm=null;G.mode=null;renderGame();};
   bt.appendChild(ok);bt.appendChild(no);ov.appendChild(box);return ov;
 }
-function toggleLog(){G._showLog=!G._showLog;renderGame();}
+function toggleLog(){G._showLog=!G._showLog;if(G._showLog)ttHide();renderGame();}
 function mkLog(){
   const w=el('div','log'+(G._showLog?' sheet':''));
   const head=el('div','log-head');
@@ -2735,6 +2736,7 @@ let _ttTimer=null,_lpFired=0;
 function toastMs(html){return Math.min(9000,Math.max(3500,1800+html.replace(/<[^>]+>/g,'').length*45));}
 function ttShow(t,hold){
   const h=t.getAttribute('data-tip');if(!h)return;
+  if(G._showLog||document.querySelector('.modal.open,.over'))return;   // nada de tooltips encima del registro, los modales ni el cartel final
   TT.innerHTML=h;TT.classList.add('on');TT.style.transform='';TT.style.opacity='';
   const r=t.getBoundingClientRect(),w=TT.offsetWidth,hh=TT.offsetHeight;
   let x=Math.min(Math.max(8,r.left+r.width/2-w/2),window.innerWidth-w-8);
@@ -2807,7 +2809,7 @@ function welcomeInit(){
     document.getElementById('welcome-x').onclick=close;document.getElementById('welcome-no').onclick=close;
     document.getElementById('welcome-yes').onclick=()=>{close();openTutorial();};
     m.addEventListener('click',e=>{if(e.target===m)close();});
-    setTimeout(()=>{const sc=document.getElementById('sel1-screen');if(!sc||!sc.classList.contains('active'))return;m.classList.add('open');document.addEventListener('keydown',onKey);},600);
+    setTimeout(()=>{const sc=document.getElementById('sel1-screen');if(!sc||!sc.classList.contains('active'))return;ttHide();m.classList.add('open');document.addEventListener('keydown',onKey);},600);
   }catch(e){}
 }
 welcomeInit();
