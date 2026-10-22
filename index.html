@@ -399,7 +399,7 @@ button{font-family:inherit;color:inherit}
 }
 
 /* ══ v3: tablero grande, menú único, tooltips ══ */
-#tt{position:fixed;z-index:80;max-width:min(270px,calc(100vw - 16px));background:var(--ink);color:#fff;border-radius:12px;padding:9px 12px;font-size:12px;line-height:1.45;pointer-events:none;opacity:0;transform:translateY(3px);transition:opacity .12s,transform .12s;box-shadow:var(--sh-2);user-select:none;-webkit-user-select:none;touch-action:pan-y;cursor:pointer}
+#tt{position:fixed;z-index:80;max-width:min(270px,calc(100vw - 16px));background:rgba(255,255,255,.92);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:12px;line-height:1.45;pointer-events:none;opacity:0;transform:translateY(3px);transition:opacity .1s,transform .1s;box-shadow:var(--sh-2);user-select:none;-webkit-user-select:none;touch-action:pan-y;cursor:pointer}
 #tt.on{opacity:1;transform:none;pointer-events:auto}
 #tt b{font-weight:600}
 .cd-mid{display:flex;flex-direction:column;align-items:center;gap:6px}
@@ -2734,7 +2734,7 @@ buildSortBar();buildDiffSeg();document.getElementById('btn-auto1').innerHTML=ic(
 // ════ TOOLTIPS (hover en desktop, mantener apretado en mobile) ════
 const TT=document.createElement('div');TT.id='tt';document.body.appendChild(TT);
 let _ttTimer=null,_lpFired=0;
-function toastMs(html){return Math.min(9000,Math.max(3500,1800+html.replace(/<[^>]+>/g,'').length*45));}
+function toastMs(html){return Math.min(3500,Math.max(1500,700+html.replace(/<[^>]+>/g,'').length*20));}
 function ttShow(t,hold){
   const h=t.getAttribute('data-tip');if(!h)return;
   if(G._showLog||document.querySelector('.modal.open,.over'))return;   // nada de tooltips encima del registro, los modales ni el cartel final
@@ -2762,18 +2762,18 @@ function attachSwipe(t){
     if(x0===null)return;const d=dx,held=Date.now()-t0;x0=null;t.style.transition='';
     if(Math.abs(d)>60)t._dismiss(false,d>0?1:-1);
     else if(!moved&&held<350)t._dismiss();              // toque corto: cerrar
-    else{t.style.transform='';t.style.opacity='';rearm(3500);} // mantenido: queda abierto un rato más
+    else{t.style.transform='';t.style.opacity='';rearm(1500);} // mantenido: queda abierto un rato más
   };
   t.addEventListener('pointerup',end);t.addEventListener('pointercancel',end);
   t.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')t._pause();});
-  t.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'&&x0===null&&!t._gone)rearm(2500);});
+  t.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'&&x0===null&&!t._gone)rearm(700);});
 }
 function ttHide(){TT.classList.remove('on');TT.style.transform='';TT.style.opacity='';}
 attachSwipe(TT);
 const tipOf=e=>e.target.closest&&e.target.closest('[data-tip]');
 // mouse: queda abierto mientras estés encima (de la carta o del cuadro) y se cierra solo un rato después de salir
-document.addEventListener('pointerover',e=>{if(e.pointerType!=='mouse'||(e.target.closest&&e.target.closest('#tt')))return;const t=tipOf(e);if(t){if(Date.now()-(TT._offAt||0)>400)ttShow(t,true);}else if(TT.classList.contains('on'))TT._rearm(2500);});
-document.addEventListener('pointerout',e=>{if(e.pointerType!=='mouse'||!TT.classList.contains('on'))return;const to=e.relatedTarget;if(to&&to.closest&&to.closest('#tt'))return;TT._rearm(2500);});
+document.addEventListener('pointerover',e=>{if(e.pointerType!=='mouse'||(e.target.closest&&e.target.closest('#tt')))return;const t=tipOf(e);if(t){if(Date.now()-(TT._offAt||0)>400)ttShow(t,true);}else if(TT.classList.contains('on'))TT._rearm(700);});
+document.addEventListener('pointerout',e=>{if(e.pointerType!=='mouse'||!TT.classList.contains('on'))return;const to=e.relatedTarget;if(to&&to.closest&&to.closest('#tt'))return;TT._rearm(700);});
 // touch: mantener apretado abre; al soltar queda abierto el tiempo de lectura; tocar fuera lo cierra
 document.addEventListener('touchstart',e=>{
   if(e.target.closest&&e.target.closest('#tt'))return;
