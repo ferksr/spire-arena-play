@@ -1241,7 +1241,7 @@ function initGame(){_flash=null;statusReset();
   G.p1={hand:p1c.slice(0,4),deck:p1c.slice(4),discard:[],actLeft:1,actMax:1};
   aiRollPersona();
   const acd=aiPickDeck(); G.ai={hand:acd.slice(0,4),deck:acd.slice(4),discard:[],actLeft:1,actMax:1};
-  Object.assign(G,{cur:'p1',sel:null,validCells:[],rangedMode:false,comboPending:null,log:[],winner:null,aiThinking:false,aiStrat:'LATERAL',aiStratLocked:false,aiTurnNum:0,gameHistory:[],phase:'game',gameDiff:G.difficulty,stats:{turns:0,elim:0,lost:0,done:false,hitsOn:{p1:{b:0,s:0},ai:{b:0,s:0}}},_aiHL:null,aiMode:'v2',_overOpen:true,mode:null,confirm:null,_lastHit:null});
+  Object.assign(G,{cur:'p1',sel:null,validCells:[],rangedMode:false,comboPending:null,log:[],winner:null,aiThinking:false,aiStrat:'LATERAL',aiStratLocked:false,aiTurnNum:0,gameHistory:[],phase:'game',gameDiff:G.difficulty,stats:{turns:0,elim:0,lost:0,done:false,hitsOn:{p1:{b:0,s:0},ai:{b:0,s:0}}},paid:{p1:0,ai:0},aiCounter:false,_aiHL:null,aiMode:'v2',_overOpen:true,mode:null,confirm:null,_lastHit:null});
   const first=Math.random()<0.5?'p1':'ai';
   G.cur=first; gP(first).actLeft=gP(first).actMax; if(first==='p1')G.stats.turns=1;
   G.aiStratLocked=false; G.aiTurnNum=0; G.gameHistory=[];
@@ -1509,6 +1509,7 @@ function hitTemple(tr,tc,attacker){
   const tpl=G.board[tr][tc];if(!tpl||tpl.t!=='temple')return;
   tpl.hp--;const own=gP(tpl.owner);
   if(!G._sim&&!G._repo&&G.stats)G.stats.hitsOn[tpl.owner][tpl.sz]++;
+  if(!G._sim&&G._repo&&G.paid)G.paid[tpl.owner]++;
   fx({k:'burst',r:tr,c:tc,icon:'temple',tn:tpl.owner==='p1'?'lose':'win',at:0});fx({k:'float',r:tr,c:tc,text:'−1',tn:tpl.owner==='p1'?'lose':'win',at:120});fxSeq(500);
   const sz=tpl.sz==='b'?'Central':'Chico',mine=tpl.owner==='p1',ownerS=mine?'tuyo':'de la IA';
   if(G._repo){
@@ -1685,7 +1686,7 @@ function clearSel(){G.sel=null;G.validCells=[];G.rangedMode=false;renderGame();}
 // ════ PERSONALIDADES OCULTAS ════
 // Cada partida la IA toma una personalidad al azar (el jugador no la ve). Dentro de ella varía levemente sus pesos,
 // su sesgo de tipo en el mazo y, en cada turno, su estilo; además explora jugadas alternativas parecidas.
-const PERSONAS={"agresiva":{"ai":{"actVal":8.25,"card":2.61,"hand":0.17,"adv":11.99,"lane":24.26,"deployRisk":0.12,"tpScale":1982.63,"cycle":1.7,"explore":0.19},"deck":{"charge":5.92,"ranged":2.45,"S":2.54,"combo":0.42,"blast":0,"B":0.91,"noise":3.07}},"defensiva":{"ai":{"actVal":57.33,"card":7.87,"hand":3.4,"adv":4.41,"lane":13.46,"deployRisk":13.6,"tpScale":540.6,"cycle":8.5,"explore":0.1},"deck":{"charge":7.31,"ranged":2.22,"S":2.55,"combo":0.47,"blast":0,"B":0.57,"noise":1.16}},"equilibrada":{"ai":{"actVal":73.1,"card":1.1,"hand":0.43,"adv":13.26,"lane":12.6,"deployRisk":0.49,"tpScale":825,"cycle":4.61,"explore":0.11},"deck":{"charge":7.75,"ranged":2.05,"S":4.8,"combo":5,"blast":0.93,"B":1.17,"noise":1.19}},"artillera":{"ai":{"actVal":33.58,"card":5.1,"hand":1.7,"adv":6.05,"lane":5.5,"deployRisk":2.58,"tpScale":660,"cycle":1.65,"explore":0.05},"deck":{"charge":9.13,"ranged":1.25,"S":2.12,"combo":0.16,"blast":0.14,"B":1.94,"noise":1}},"temeraria":{"ai":{"actVal":13.13,"card":1.7,"hand":0.47,"adv":8.06,"lane":37.27,"deployRisk":0.09,"tpScale":2000,"cycle":0.25,"explore":0.3},"deck":{"charge":7.8,"ranged":0.71,"S":1.34,"combo":0.07,"blast":4,"B":2.07,"noise":3.84}},"cautelosa":{"ai":{"actVal":87.8,"card":5.5,"hand":3.19,"adv":5.56,"lane":4.98,"deployRisk":12.91,"tpScale":613.67,"cycle":5.11,"explore":0.05},"deck":{"charge":4.43,"ranged":1.24,"S":1.17,"combo":0,"blast":1.89,"B":1.43,"noise":2.6}}};
+const PERSONAS={"sacrificadora":{"ai":{"actVal":120,"card":1.1,"hand":0.43,"adv":13.26,"lane":12.6,"deployRisk":0.49,"tpScale":825,"cycle":4.61,"explore":0.11,"repoMin":2},"deck":{"charge":7.75,"ranged":2.05,"S":4.8,"combo":5,"blast":0.93,"B":1.17,"noise":1.19}},"agresiva":{"ai":{"actVal":8.25,"card":2.61,"hand":0.17,"adv":11.99,"lane":24.26,"deployRisk":0.12,"tpScale":1982.63,"cycle":1.7,"explore":0.19},"deck":{"charge":5.92,"ranged":2.45,"S":2.54,"combo":0.42,"blast":0,"B":0.91,"noise":3.07}},"defensiva":{"ai":{"actVal":57.33,"card":7.87,"hand":3.4,"adv":4.41,"lane":13.46,"deployRisk":13.6,"tpScale":540.6,"cycle":8.5,"explore":0.1},"deck":{"charge":7.31,"ranged":2.22,"S":2.55,"combo":0.47,"blast":0,"B":0.57,"noise":1.16}},"equilibrada":{"ai":{"actVal":73.1,"card":1.1,"hand":0.43,"adv":13.26,"lane":12.6,"deployRisk":0.49,"tpScale":825,"cycle":4.61,"explore":0.11},"deck":{"charge":7.75,"ranged":2.05,"S":4.8,"combo":5,"blast":0.93,"B":1.17,"noise":1.19}},"artillera":{"ai":{"actVal":33.58,"card":5.1,"hand":1.7,"adv":6.05,"lane":5.5,"deployRisk":2.58,"tpScale":660,"cycle":1.65,"explore":0.05},"deck":{"charge":9.13,"ranged":1.25,"S":2.12,"combo":0.16,"blast":0.14,"B":1.94,"noise":1}},"temeraria":{"ai":{"actVal":13.13,"card":1.7,"hand":0.47,"adv":8.06,"lane":37.27,"deployRisk":0.09,"tpScale":2000,"cycle":0.25,"explore":0.3},"deck":{"charge":7.8,"ranged":0.71,"S":1.34,"combo":0.07,"blast":4,"B":2.07,"noise":3.84}},"cautelosa":{"ai":{"actVal":87.8,"card":5.5,"hand":3.19,"adv":5.56,"lane":4.98,"deployRisk":12.91,"tpScale":613.67,"cycle":5.11,"explore":0.05},"deck":{"charge":4.43,"ranged":1.24,"S":1.17,"combo":0,"blast":1.89,"B":1.43,"noise":2.6}}};
 // Dificultad: cuánto busca la IA, cuánto se equivoca a propósito y qué tan bueno es su mazo
 const DIFF_PRESETS={
   easy:{beam:2,depth:2,budgetMs:120,explore:0.55,exploreTol:400,noise:10},
@@ -1721,9 +1722,17 @@ function aiRollPersona(){
   for(const x in P.ai)ai[x]=x==='explore'?Math.max(0,P.ai[x]+(Math.random()-.5)*0.06):P.ai[x]*(1+(Math.random()-.5)*0.3);
   for(const x in P.deck)deck[x]=Math.max(0,P.deck[x]+(Math.random()-.5)*(x==='noise'?1:2));
   const tt=['water','fire','metal','plant','earth'];deck['t_'+tt[Math.floor(Math.random()*5)]]=2+Math.random()*2;
-  G.aiPersona={key:k,ai,deck};G.aiBase={...ai};Object.assign(AI2,ai);applyDifficulty();
+  if(ai.repoMin)ai.repoMin=Math.round(ai.repoMin);
+  G.aiPersona={key:k,ai,deck};G.aiBase={...ai};AI2.repoMin=1;Object.assign(AI2,ai);applyDifficulty();
 }
-function aiMood(){const b=G.aiBase;if(!b)return;for(const x of['adv','lane','actVal'])AI2[x]=b[x]*(0.8+Math.random()*0.45);}
+// Modo contra-sacrificador (solo Difícil): si el jugador ya pagó 3 o más vidas de templo para reponer, la IA cambia a una configuración entrenada contra ese estilo (valora menos las acciones extra, más el avance y el ciclo del mazo, y repone solo con 2 o más cartas en el descarte); aprendida con tools/counter.js
+const COUNTER={"actVal":48.31,"card":0.85,"hand":0.64,"adv":12.53,"lane":14.96,"deployRisk":0.42,"tpScale":855.85,"cycle":5.6,"repoMin":2};
+function aiMood(){
+  const b=G.aiBase;if(!b)return;
+  const ctr=(G.gameDiff||G.difficulty)==='hard'&&G.paid&&G.paid.p1>=3,src=ctr?COUNTER:b;
+  if(ctr){Object.assign(AI2,COUNTER);G.aiCounter=true;}
+  for(const x of['adv','lane','actVal'])AI2[x]=src[x]*(0.8+Math.random()*0.45);
+}
 // Pesos de la elección de mazo de la IA (evolucionables con tools/evolve.js)
 const AI_DECK={combo:2,charge:7,S:2,ranged:1,blast:1,B:1,noise:2.5};
 function aiPickIds(w){
@@ -2137,7 +2146,7 @@ function buildAIReason(action,score,stratCtx){
 // estima la respuesta del rival con las cartas que ya están en el tablero.
 // No mira la mano ni el mazo del rival.
 // Pesos evolucionados con tools/evolve.js (auto-juego contra el campeón anterior)
-const AI2={beam:12,depth:4,actVal:43,card:2,hand:0.3,adv:7.8,lane:14.6,deployRisk:0.3,tpScale:1500,budgetMs:400,cycle:3,explore:0.1,exploreTol:80};
+const AI2={beam:12,depth:4,actVal:43,card:2,hand:0.3,adv:7.8,lane:14.6,deployRisk:0.3,tpScale:1500,budgetMs:400,cycle:3,explore:0.1,exploreTol:80,repoMin:1};   // repoMin: la búsqueda solo considera reponer con al menos tantas cartas en el descarte
 function simGet(){return{board:G.board,ruins:G.ruins,p1:G.p1,ai:G.ai,cur:G.cur,winner:G.winner,phase:G.phase};}
 function simSet(s){G.board=s.board;G.ruins=s.ruins;G.p1=s.p1;G.ai=s.ai;G.cur=s.cur;G.winner=s.winner;G.phase=s.phase;}
 function simClone(s){
@@ -2251,7 +2260,7 @@ function aiSearchBest(who){
     if(d>0&&Date.now()-t0>AI2.budgetMs)break;
     const cand=[];
     for(const nd of frontier){
-      for(const a of genActions(nd.s,who)){
+      for(const a of(()=>{const all=genActions(nd.s,who),ok=all.filter(x=>x.type!=='repo'||gP2(nd.s,who).discard.length>=AI2.repoMin);return ok.length?ok:all;})()){
         if(a.type==='end_turn'){leaves.push({s:nd.s,first:nd.first||a,ev:nd.ev,ended:true});continue;}
         const s2=simApply(nd.s,who,a),ev=evalState(s2,who);
         const node={s:s2,first:nd.first||a,ev:ev};
