@@ -1241,7 +1241,7 @@ function initGame(){_flash=null;statusReset();
   G.p1={hand:p1c.slice(0,4),deck:p1c.slice(4),discard:[],actLeft:1,actMax:1};
   aiRollPersona();
   const acd=aiPickDeck(); G.ai={hand:acd.slice(0,4),deck:acd.slice(4),discard:[],actLeft:1,actMax:1};
-  Object.assign(G,{cur:'p1',sel:null,validCells:[],rangedMode:false,comboPending:null,log:[],winner:null,aiThinking:false,aiStrat:'LATERAL',aiStratLocked:false,aiTurnNum:0,gameHistory:[],phase:'game',gameDiff:G.difficulty,stats:{turns:0,elim:0,lost:0,done:false},_aiHL:null,aiMode:'v2',_overOpen:true,mode:null,confirm:null,_lastHit:null});
+  Object.assign(G,{cur:'p1',sel:null,validCells:[],rangedMode:false,comboPending:null,log:[],winner:null,aiThinking:false,aiStrat:'LATERAL',aiStratLocked:false,aiTurnNum:0,gameHistory:[],phase:'game',gameDiff:G.difficulty,stats:{turns:0,elim:0,lost:0,done:false,hitsOn:{p1:{b:0,s:0},ai:{b:0,s:0}}},_aiHL:null,aiMode:'v2',_overOpen:true,mode:null,confirm:null,_lastHit:null});
   const first=Math.random()<0.5?'p1':'ai';
   G.cur=first; gP(first).actLeft=gP(first).actMax; if(first==='p1')G.stats.turns=1;
   G.aiStratLocked=false; G.aiTurnNum=0; G.gameHistory=[];
@@ -1464,18 +1464,19 @@ function toDeck(ci,viaTemple){
   dc(gP(ci.owner)).push(ci);
   if(!G._sim&&!viaTemple&&G.stats)G.stats[ci.owner==='p1'?'lost':'elim']++;   // la carta que muere al golpear un templo no cuenta
 }
-// Puntaje 0–100: el nivel de la IA fija la banda y los turnos ajustan dentro de ella (12 turnos = referencia rápida, 40 o más = lento)
-const SCORE_BANDS={win:{easy:[11,28],normal:[40,30],hard:[71,29]},lose:{easy:[0,3],normal:[4,2],hard:[7,3]}};
-function scoreOf(result,diff,turns){
-  const sp=r=>Math.max(0,Math.min(1,r)),fast=sp((40-turns)/28),slow=sp((turns-12)/28);
-  const f=(k,s)=>SCORE_BANDS[k][diff][0]+SCORE_BANDS[k][diff][1]*s;
-  if(result==='draw')return Math.round((f('win',.5)+f('lose',.5))/2);
-  return Math.round(result==='win'?f('win',fast):f('lose',slow));
+// Puntaje 0–100 = 100 × dificultad × calidad. Calidad al ganar: rapidez (12 turnos = referencia, 40 o más = lento) y poco daño recibido; al perder: cuánto avanzaste y cuánto aguantaste
+// Avance = vidas quitadas al rival (solo golpes de ataque; lo que se paga con Reponer no cuenta); sin ganar el máximo es 0,75, por eso se normaliza
+function progressOf(h){return h?Math.max(h.b/3,h.s/4):0;}
+function scoreOf(result,diff,turns,myProg,aiProg){
+  const sp=r=>Math.max(0,Math.min(1,Number.isFinite(r)?r:0)),near=r=>sp(r/.75);
+  const W={easy:.35,normal:.65,hard:1}[diff]||.65,t=Number.isFinite(turns)?turns:40,fast=sp((40-t)/28),slow=sp((t-12)/28);
+  const q=result==='win'?.70+.30*(.6*fast+.4*(1-near(aiProg))):.45*(.7*near(myProg)+.3*slow);
+  return Math.round(100*sp(W*q)+1e-9);
 }
 // Récord local: se guarda una vez por partida terminada; si el navegador no guarda, no hay récord para mostrar
 function saveBest(score){
   try{
-    const K='spire-best-score',raw=localStorage.getItem(K),prev=(raw!==null&&/^(100|[1-9]?\d)$/.test(raw))?Number(raw):null;   // solo enteros 0–100; todo lo demás cuenta como sin récord
+    const K='spire-best-score-2',raw=localStorage.getItem(K),prev=(raw!==null&&/^(100|[1-9]?\d)$/.test(raw))?Number(raw):null;   // solo enteros 0–100; todo lo demás cuenta como sin récord
     const best=prev===null?score:Math.max(prev,score);
     if(prev===null||best!==prev){localStorage.setItem(K,String(best));if(localStorage.getItem(K)!==String(best))return null;}
     return{best,isNew:prev===null||score>prev};
@@ -1484,7 +1485,7 @@ function saveBest(score){
 function finishGame(){
   if(G._sim||!G.stats||G.stats.done)return;G.stats.done=true;
   const res=G.winner==='draw'?'draw':G.winner==='p1'?'win':'lose',d=G.gameDiff||G.difficulty;
-  G.stats.score=scoreOf(res,d,Math.max(1,G.stats.turns));G.stats.record=saveBest(G.stats.score);
+  const h=G.stats.hitsOn;G.stats.score=scoreOf(res,d,Math.max(1,G.stats.turns),progressOf(h.ai),progressOf(h.p1));G.stats.record=saveBest(G.stats.score);
 }
 function checkWin(){
   for(const who of['p1','ai']){
@@ -1497,6 +1498,7 @@ function hitTemple(tr,tc,attacker){
   G._lastHit=G._repo?'pago':'ataque';
   const tpl=G.board[tr][tc];if(!tpl||tpl.t!=='temple')return;
   tpl.hp--;const own=gP(tpl.owner);
+  if(!G._sim&&!G._repo&&G.stats)G.stats.hitsOn[tpl.owner][tpl.sz]++;
   fx({k:'burst',r:tr,c:tc,icon:'temple',tn:tpl.owner==='p1'?'lose':'win',at:0});fx({k:'float',r:tr,c:tc,text:'−1',tn:tpl.owner==='p1'?'lose':'win',at:120});fxSeq(500);
   const sz=tpl.sz==='b'?'Central':'Chico',mine=tpl.owner==='p1',ownerS=mine?'tuyo':'de la IA';
   if(G._repo){
