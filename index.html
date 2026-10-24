@@ -1431,7 +1431,7 @@ function scoreOf(result,diff,turns){
 // Récord local: se guarda una vez por partida terminada; si el navegador no guarda, no hay récord para mostrar
 function saveBest(score){
   try{
-    const K='spire-best-score',raw=localStorage.getItem(K),prev=(raw!==null&&/^(100|\d{1,2})$/.test(raw))?Number(raw):null;   // solo enteros 0–100; todo lo demás cuenta como sin récord
+    const K='spire-best-score',raw=localStorage.getItem(K),prev=(raw!==null&&/^(100|[1-9]?\d)$/.test(raw))?Number(raw):null;   // solo enteros 0–100; todo lo demás cuenta como sin récord
     const best=prev===null?score:Math.max(prev,score);
     if(prev===null||best!==prev){localStorage.setItem(K,String(best));if(localStorage.getItem(K)!==String(best))return null;}
     return{best,isNew:prev===null||score>prev};
