@@ -832,8 +832,9 @@ button{font-family:inherit;color:inherit}
 @media(max-width:350px){.g2-bar .acts .ic:nth-child(n+4){display:none}.g2-bar{gap:3px}.g2-bar .g2-name{letter-spacing:0}.g2-diff{font-size:9.5px;margin-left:2px}.g2-bar .g2-stats{gap:4px}}
 
 /* puntaje y estadísticas del cartel final */
-.over-score{font-family:var(--display);font-size:15px;color:var(--ink-3);margin:-14px 0 14px}
-.over-score b{font-size:40px;font-weight:600;color:var(--ink);line-height:1}
+.over-score{display:flex;flex-direction:column;align-items:center;gap:3px;margin:-14px 0 14px}
+.over-score span{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.over-score b{font-family:var(--display);font-size:40px;font-weight:600;color:var(--ink);line-height:1}
 .over-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 20px;text-align:left}
 .over-stats div{display:flex;justify-content:space-between;align-items:baseline;gap:8px;background:var(--surface-2);border-radius:10px;padding:7px 10px;font-size:12px;color:var(--ink-2)}
 .over-stats b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
@@ -2826,7 +2827,7 @@ function overStatsHTML(){
   const st=G.stats;if(!st||st.score===undefined)return '';
   const alive=o=>{let n=0;for(const r of G.board)for(const c of r)if(c&&c.t==='temple'&&c.owner===o&&c.hp>0)n++;return n;};
   const cell=(l,v)=>'<div><span>'+l+'</span><b>'+v+'</b></div>',rec=st.record;
-  return '<div class="over-score"><b>'+st.score+'</b> / 100</div><div class="over-stats">'
+  return '<div class="over-score"><span>Score</span><b>'+st.score+'</b></div><div class="over-stats">'
     +cell('Turnos',st.turns)+cell('Cartas eliminadas',st.elim)+cell('Cartas perdidas',st.lost)
     +cell('Templos destruidos',3-alive('ai'))+cell('Templos perdidos',3-alive('p1'))
     +(rec?cell(rec.isNew?'Nuevo récord':'Récord',rec.best):'')+'</div>';
