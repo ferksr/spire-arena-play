@@ -1357,6 +1357,15 @@ function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 // ════ SOUND SYSTEM ════
 const _AC=new(window.AudioContext||window.webkitAudioContext)();
 function _resume(){if(_AC.state==='suspended')_AC.resume();}
+// Un solo sonido a la vez: cada efecto nuevo corta el anterior (con un fundido de 15 ms) y cancela lo que ese efecto tenía programado
+let _live=[],_pend=[];
+function _stopAll(){
+  const t=_AC.currentTime;
+  for(const v of _live){try{v.g.gain.cancelScheduledValues(t);v.g.gain.setValueAtTime(v.g.gain.value,t);v.g.gain.linearRampToValueAtTime(0,t+.015);v.s.stop(t+.02);}catch(e){}}
+  _live=[];_pend.forEach(clearTimeout);_pend=[];
+}
+function _later(fn,ms){_pend.push(setTimeout(fn,ms));}
+function _track(s,g,end){const v={s,g};_live.push(v);s.onended=()=>{_live=_live.filter(x=>x!==v);};}
 function _tone(freq,type,vol,dur,fadeStart,pitchEnd){
   if(G._sim||window._muted)return;
   _resume();
@@ -1366,7 +1375,7 @@ function _tone(freq,type,vol,dur,fadeStart,pitchEnd){
   if(pitchEnd)o.frequency.exponentialRampToValueAtTime(pitchEnd,_AC.currentTime+dur);
   g.gain.setValueAtTime(vol||0.18,_AC.currentTime);
   g.gain.exponentialRampToValueAtTime(0.001,_AC.currentTime+(fadeStart||dur));
-  o.start();o.stop(_AC.currentTime+dur);
+  o.start();o.stop(_AC.currentTime+dur);_track(o,g);
 }
 function _noise(vol,dur,type){
   if(G._sim||window._muted)return;
@@ -1378,9 +1387,9 @@ function _noise(vol,dur,type){
   src.buffer=buf;src.connect(f);f.connect(g);g.connect(_AC.destination);
   g.gain.setValueAtTime(vol||0.15,_AC.currentTime);
   g.gain.exponentialRampToValueAtTime(0.001,_AC.currentTime+dur);
-  src.start();src.stop(_AC.currentTime+dur);
+  src.start();src.stop(_AC.currentTime+dur);_track(src,g);
 }
-const SFX={
+const _SFX={
   move:   ()=>{_tone(520,'sine',0.07,0.08,0.05);},
   deploy: ()=>{_tone(300,'triangle',0.15,0.15,0.10);_tone(200,'triangle',0.10,0.15,0.10);},
   kill:   ()=>{_noise(0.18,0.12,'highpass');_tone(180,'sawtooth',0.12,0.18,0.12,80);},
@@ -1389,13 +1398,14 @@ const SFX={
   tie:    ()=>{_tone(300,'square',0.10,0.12,0.08);_tone(280,'square',0.10,0.14,0.09);},
   temple: ()=>{_tone(120,'sawtooth',0.22,0.40,0.35,60);_noise(0.15,0.20,'bandpass');},
   templeDestroy:()=>{_noise(0.4,0.55,'lowpass');_tone(60,'sawtooth',0.30,0.55,0.50,30);},
-  combo:  ()=>{_tone(660,'sine',0.12,0.08,0.06);setTimeout(()=>_tone(880,'sine',0.12,0.08,0.06),80);},
+  combo:  ()=>{_tone(660,'sine',0.12,0.08,0.06);_later(()=>_tone(880,'sine',0.12,0.08,0.06),80);},
   select: ()=>{_tone(700,'sine',0.06,0.06,0.04);},
   endTurn:()=>{_tone(400,'sine',0.08,0.12,0.10,350);},
-  winGame:()=>{[0,0.1,0.2,0.35].forEach((t,i)=>{setTimeout(()=>_tone([523,659,784,1046][i],'sine',0.18,0.4,0.35),t*1000);});},
+  winGame:()=>{[0,0.1,0.2,0.35].forEach((t,i)=>{_later(()=>_tone([523,659,784,1046][i],'sine',0.18,[0.1,0.1,0.15,0.5][i],[0.09,0.09,0.13,0.45][i]),t*1000);});},
   loseGame:()=>{_tone(400,'sine',0.15,0.6,0.55,200);},
   charge: ()=>{_tone(600,'sawtooth',0.10,0.10,0.07,300);},
 };
+const SFX=Object.fromEntries(Object.entries(_SFX).map(([k,f])=>[k,()=>{if(G._sim||window._muted)return;_stopAll();f();}]));
 
 function validMoveCells(r,c,who){
   const cell=G.board[r][c]; if(!cell||cell.t!=='card')return[];
@@ -1491,7 +1501,7 @@ function checkWin(){
   for(const who of['p1','ai']){
     const enemy=opp(who);let sAlive=0,bAlive=0;
     for(let r=0;r<7;r++)for(let c=0;c<3;c++){const ce=G.board[r][c];if(ce&&ce.t==='temple'&&ce.owner===enemy){if(ce.sz==='s'&&ce.hp>0)sAlive++;if(ce.sz==='b'&&ce.hp>0)bAlive++;}}
-    if(bAlive===0||sAlive===0){G.winner=who;G.phase='over';finishGame();if(!G._sim)setTimeout(()=>who==='p1'?SFX.winGame():SFX.loseGame(),200);return;}
+    if(bAlive===0||sAlive===0){G.winner=who;G.phase='over';finishGame();if(!G._sim)setTimeout(()=>who==='p1'?SFX.winGame():SFX.loseGame(),600);return;}
   }
 }
 function hitTemple(tr,tc,attacker){
