@@ -2330,7 +2330,7 @@ function computeEndKeys(){
   if(G.ruins.has(row+',1'))keys.add(row+',1');else[0,2].forEach(c=>{if(G.ruins.has(row+','+c))keys.add(row+','+c);});
   return keys;
 }
-// Todo lo que cambia (acciones, mazo, descarte, vida de templos, turno, cartas nuevas en mano) destella un momento
+// Todo lo que cambia (acciones, cartas en mano, mazo, descarte, vida de templos, turno, cartas nuevas en mano) destella un momento
 // El tablero ocupa todo el alto libre: la separación con las barras queda igual que entre la barra tuya y la mano
 function fitBoard(){
   if(typeof getComputedStyle!=='function')return;
@@ -2441,7 +2441,7 @@ function renderGame(){
 }
 function g2Btn(icn,label,fn,dis,cls){const b=el('button','btn icon sm '+(cls||''));b.innerHTML=ic(icn);b.setAttribute('aria-label',label);b.setAttribute('data-tip',label);if(fn)b.onclick=fn;if(dis)b.disabled=true;return b;}
 function g2Status(){const st=mkStatus();st.classList.add('g2-status');st.setAttribute('role','button');st.setAttribute('aria-label','Estado del juego: tocá para ver el registro');st.onclick=()=>toggleLog();return st;}
-// Barra de jugador: [nombre][estado][acciones · mazo · descarte][reponer / contexto][menú]; la IA usa las mismas columnas
+// Barra de jugador: [nombre][estado][acciones · mano · mazo · descarte][reponer / contexto][menú]; la IA usa las mismas columnas
 function mkBar(who){
   const me=who==='p1',d=el('div','g2-bar g2-'+who+(G.cur===who&&G.phase!=='over'?' g2-on':''));
   const n=el('span','g2-name');if(me)n.textContent='P1';else n.innerHTML='IA <span class="g2-diff">'+DIFF_NAME[G.gameDiff||G.difficulty].toLowerCase()+'</span>';n.setAttribute('data-fk','turn.'+who);n.setAttribute('data-fv',G.cur===who?'1':'0');d.appendChild(n);
