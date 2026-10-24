@@ -855,8 +855,10 @@ button{font-family:inherit;color:inherit}
   .over-box:not(.dlg) .over-btns{grid-column:2;grid-row:4;margin-top:8px}
 }
 /* Lo que es claro por diseño (cartas y templos de P1, filas de tipos de las reglas, insignias) conserva los colores del modo claro por dentro, así su texto e íconos siguen legibles */
-:root[data-theme="dark"] :is(.cd:not(.dk),.cell.c-p1,.cell.temple.o-p1,.beat-item,.badge,.dir-chip){--ink:#262A37;--ink-2:#5A6074;--ink-3:#9298AA;--on-ink:#fff;--line:#E7E9F0;--line-2:#D9DCE6;--surface:#fff;--surface-2:#F8F9FC;--blue-d:#3F73D1;--blue-s:#E8F0FE;--crimson-d:#C23F5F;--crimson-s:#FDEBEF;--cyan-d:#2A93A8;--cyan-s:#E0F6FA;--violet-d:#B03F90;--violet-s:#FBE9F5}
+:root[data-theme="dark"] :is(.cd:not(.dk),.cell.c-p1,.cell.temple.o-p1,.beat-item,.badge,.dir-chip){--ink:#262A37;--ink-2:#4B5165;--ink-3:#656C82;--on-ink:#fff;--line:#E7E9F0;--line-2:#D9DCE6;--surface:#fff;--surface-2:#F8F9FC;--blue-d:#3F73D1;--blue-s:#E8F0FE;--crimson-d:#C23F5F;--crimson-s:#FDEBEF;--cyan-d:#2A93A8;--cyan-s:#E0F6FA;--violet-d:#B03F90;--violet-s:#FBE9F5}
 :root[data-theme="dark"] :is(.cd:not(.dk),.cell.c-p1,.cell.temple.o-p1){color:#262A37}
+/* en oscuro, lo claro de P1 es un gris claro (menos contraste con el fondo) */
+:root[data-theme="dark"] :is(.cd:not(.dk):not(.m-cell),.cell.c-p1,.cell.temple.o-p1:not(.v-repo)){background:#D4D8E3}
 :root[data-theme="dark"] .cell.c-ai,:root[data-theme="dark"] .cell.temple.o-ai,:root[data-theme="dark"] .g2-ai:not(.g2-on){box-shadow:0 0 0 1px rgba(255,255,255,.22),0 2px 8px rgba(0,0,0,.5)}
 /* v17: celulares en horizontal (alto <= 500): selección en 7 columnas y juego con el tablero a la izquierda */
 @media(orientation:landscape) and (max-height:500px){
