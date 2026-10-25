@@ -1276,8 +1276,10 @@ function comboNoTargets(w){log('🔥 <b>'+w.cd.name+'</b> tiene Combo pero no ha
 function ghostOf(ci){return{html:cardHTML(ci.cd,'cell',ci.owner==='ai'),owner:ci.owner,type:ci.cd.type};}
 function tone(winnerOwner){return winnerOwner==='p1'?'win':'lose';}
 // t = tiempo (ms) donde ocurre cada paso dentro de la acción; se encadenan en combos
+// slide: si la misma carta ya tenía un deslizamiento, el anterior (`until`) deja su copia a la vista en la casilla hasta que empieza el nuevo
 function fx(o){if(G._sim)return;const T=G._fxT||0;o={...o,at:(o.at||0)+T};
-  if(o.k==='slide'){const m=G._slideEnd=G._slideEnd||{};if(m[o.inst]>o.at)o.at=m[o.inst];m[o.inst]=o.at+o.dur;}if(o.dieAt!=null)o.dieAt+=T;if(o.show!=null)o.show+=T;(G._fx=G._fx||[]).push(o);}
+  if(o.k==='slide'){const m=G._slideEnd=G._slideEnd||{};if(m[o.inst]>o.at)o.at=m[o.inst];m[o.inst]=o.at+o.dur;
+    const prev=(G._fx||[]).filter(x=>x.k==='slide'&&x.inst===o.inst).pop();if(prev)prev.until=o.at;}if(o.dieAt!=null)o.dieAt+=T;if(o.show!=null)o.show+=T;(G._fx=G._fx||[]).push(o);}
 function fxSeq(ms){G._fxT=(G._fxT||0)+ms;}
 // Carga con 2 pasos en diagonal: se anima en "L" (primero una celda y después la otra), pasando por una celda libre permitida
 function chargeVia(ci,fr,fc,tr,tc){
@@ -2497,9 +2499,9 @@ function _playFx(boardArg,posArg){
       const V=f.via?rect(f.via.r,f.via.c):null;
       const kf=V?[{transform:'translate(0,0)'},{transform:'translate('+(V.x-A.x)+'px,'+(V.y-A.y)+'px)',offset:.5},{transform:'translate('+(B.x-A.x)+'px,'+(B.y-A.y)+'px)'}]
                 :[{transform:'translate(0,0)'},{transform:'translate('+(B.x-A.x)+'px,'+(B.y-A.y)+'px)'}];
-      e.animate(kf,{duration:f.dur,delay:at,easing:V?'ease-in-out':'cubic-bezier(.4,0,.2,1)',fill:'forwards'}).finished.then(()=>e.remove(),()=>{});
+      e.animate(kf,{duration:f.dur,delay:at,easing:V?'ease-in-out':'cubic-bezier(.4,0,.2,1)',fill:'forwards'}).finished.then(()=>{if(f.until==null)e.remove();},()=>{});
       e.style.opacity='0';e.animate([{opacity:1},{opacity:1}],{duration:f.dur,delay:at,fill:'forwards'});
-      setTimeout(()=>e.remove(),at+f.dur+30);done(at+f.dur);
+      setTimeout(()=>e.remove(),(f.until!=null?f.until:at+f.dur)+30);done(at+f.dur);
     }else if(f.k==='ghost'){
       const R=rect(f.r,f.c);if(!R)return;const e=ghost(f.g,R);e.classList.add('fx-'+(f.tn||'none'));e.style.zIndex=f.show!=null?6:3;
       const show=f.show||0,fade=f.fade||FX_DIE,total=f.dieAt+fade,o=x=>Math.min(1,x/total);
