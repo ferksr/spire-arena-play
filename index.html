@@ -946,23 +946,23 @@ const CARDS=[
   {id:1, name:'Maretazo',emoji:'🌊',type:'water',kw:['⬆️','⏫','↔️','⬇️'],desc:'Carga, flanquea y retrocede.'},
   {id:2, name:'Torrente',emoji:'💦',type:'water',kw:['⬆️','⏫','🏹','⬇️','🤜'],desc:'Carga, dispara, retrocede y encadena.'},
   {id:3, name:'Vórtice',emoji:'🌀',type:'water',kw:['⬆️','⏫','↔️'],desc:'Carga y flanquea.'},
-  {id:4, name:'Marea',emoji:'🌑',type:'water',kw:['⬆️','🏹','↔️','🤜','💣'],desc:'Dispara, flanquea, encadena y explota.'},
+  {id:4, name:'Marea',emoji:'🌑',type:'water',kw:['⬆️','🏹','⬇️','💣'],desc:'Dispara, retrocede y explota.'},
   {id:5, name:'Volcán',emoji:'🌋',type:'fire',kw:['⬆️','⏫','💣'],desc:'Carga y explota.'},
   {id:6, name:'Llamarada',emoji:'🌟',type:'fire',kw:['⬆️','⏫','🤜'],desc:'Carga y encadena.'},
   {id:7, name:'Rescoldo',emoji:'🕯️',type:'fire',kw:['⬆️','⏫','🏹','💣'],desc:'Carga, dispara y explota.'},
   {id:8, name:'Chispa',emoji:'✨',type:'fire',kw:['⬆️','🏹','↔️','⬇️','🤜'],desc:'Dispara, flanquea, retrocede y encadena.'},
   {id:9, name:'Forja',emoji:'⚙️',type:'metal',kw:['⬆️','⏫','🏹','↔️'],desc:'Carga, dispara y flanquea.'},
-  {id:10, name:'Proyectil',emoji:'🔩',type:'metal',kw:['⬆️','🏹','⬇️','🤜','💣'],desc:'Dispara, retrocede, encadena y explota.'},
+  {id:10, name:'Proyectil',emoji:'🔩',type:'metal',kw:['⬆️','⏫','↔️','💣'],desc:'Carga, flanquea y explota.'},
   {id:11, name:'Émbolo',emoji:'🔧',type:'metal',kw:['⬆️','⏫','⬇️'],desc:'Carga y retrocede.'},
   {id:12, name:'Escudo',emoji:'🛡️',type:'metal',kw:['⬆️','⏫','↔️','🤜'],desc:'Carga, flanquea y encadena.'},
   {id:13, name:'Selva',emoji:'🌳',type:'plant',kw:['⬆️','⏫','🏹'],desc:'Carga y dispara.'},
   {id:14, name:'Espiga',emoji:'🌾',type:'plant',kw:['⬆️','⏫','⬇️','💣'],desc:'Carga, retrocede y explota.'},
-  {id:15, name:'Zarza',emoji:'🌿',type:'plant',kw:['⬆️','↔️','⬇️','🤜','💣'],desc:'Flanquea, retrocede, encadena y explota.'},
+  {id:15, name:'Zarza',emoji:'🌿',type:'plant',kw:['⬆️','↔️','⬇️','🤜'],desc:'Flanquea, retrocede y encadena.'},
   {id:16, name:'Enredadera',emoji:'🌺',type:'plant',kw:['⬆️','⏫','🏹','⬇️'],desc:'Carga, dispara y retrocede.'},
   {id:17, name:'Grieta',emoji:'〰️',type:'earth',kw:['⬆️','⏫','🏹','🤜'],desc:'Carga, dispara y encadena.'},
   {id:18, name:'Alud',emoji:'⛰️',type:'earth',kw:['⬆️','⏫'],desc:'Carga.'},
   {id:19, name:'Sedimento',emoji:'🏜️',type:'earth',kw:['⬆️','🏹','↔️','⬇️','💣'],desc:'Dispara, flanquea, retrocede y explota.'},
-  {id:20, name:'Zanja',emoji:'🕳️',type:'earth',kw:['⬆️','⏫','🤜','💣'],desc:'Carga, encadena y explota.'}
+  {id:20, name:'Zanja',emoji:'🕳️',type:'earth',kw:['⬆️','⏫','⬇️','🤜'],desc:'Carga, retrocede y encadena.'}
 ]
 function hK(cd,k){const m={F:'⬆️',charge:'⏫',S:'↔️',B:'⬇️',ranged:'🏹',combo:'🤜',blast:'💣'};return cd.kw.includes(m[k]);}
 function typeBeats(cd){return(TYPE_BEATS[cd.type]||[]).map(t=>TYPE_EMOJI[t]).join('');}
@@ -1688,7 +1688,7 @@ function clearSel(){G.sel=null;G.validCells=[];G.rangedMode=false;renderGame();}
 // ════ PERSONALIDADES OCULTAS ════
 // Cada partida la IA toma una personalidad al azar (el jugador no la ve). Dentro de ella varía levemente sus pesos,
 // su sesgo de tipo en el mazo y, en cada turno, su estilo; además explora jugadas alternativas parecidas.
-const PERSONAS={"sacrificadora":{"ai":{"actVal":120,"card":1.1,"hand":0.43,"adv":13.26,"lane":12.6,"deployRisk":0.49,"tpScale":825,"cycle":4.61,"explore":0.11,"repoMin":2},"deck":{"charge":7.75,"ranged":2.05,"S":4.8,"combo":5,"blast":0.93,"B":1.17,"noise":1.19}},"agresiva":{"ai":{"actVal":8.25,"card":2.61,"hand":0.17,"adv":11.99,"lane":24.26,"deployRisk":0.12,"tpScale":1982.63,"cycle":1.7,"explore":0.19},"deck":{"charge":5.92,"ranged":2.45,"S":2.54,"combo":0.42,"blast":0,"B":0.91,"noise":3.07}},"defensiva":{"ai":{"actVal":57.33,"card":7.87,"hand":3.4,"adv":4.41,"lane":13.46,"deployRisk":13.6,"tpScale":540.6,"cycle":8.5,"explore":0.1},"deck":{"charge":7.31,"ranged":2.22,"S":2.55,"combo":0.47,"blast":0,"B":0.57,"noise":1.16}},"equilibrada":{"ai":{"actVal":73.1,"card":1.1,"hand":0.43,"adv":13.26,"lane":12.6,"deployRisk":0.49,"tpScale":825,"cycle":4.61,"explore":0.11},"deck":{"charge":7.75,"ranged":2.05,"S":4.8,"combo":5,"blast":0.93,"B":1.17,"noise":1.19}},"artillera":{"ai":{"actVal":33.58,"card":5.1,"hand":1.7,"adv":6.05,"lane":5.5,"deployRisk":2.58,"tpScale":660,"cycle":1.65,"explore":0.05},"deck":{"charge":9.13,"ranged":1.25,"S":2.12,"combo":0.16,"blast":0.14,"B":1.94,"noise":1}},"temeraria":{"ai":{"actVal":13.13,"card":1.7,"hand":0.47,"adv":8.06,"lane":37.27,"deployRisk":0.09,"tpScale":2000,"cycle":0.25,"explore":0.3},"deck":{"charge":7.8,"ranged":0.71,"S":1.34,"combo":0.07,"blast":4,"B":2.07,"noise":3.84}},"cautelosa":{"ai":{"actVal":87.8,"card":5.5,"hand":3.19,"adv":5.56,"lane":4.98,"deployRisk":12.91,"tpScale":613.67,"cycle":5.11,"explore":0.05},"deck":{"charge":4.43,"ranged":1.24,"S":1.17,"combo":0,"blast":1.89,"B":1.43,"noise":2.6}}};
+const PERSONAS={"agresiva":{"ai":{"actVal":8.25,"card":3.4,"hand":0.1,"adv":14,"lane":18.24,"deployRisk":0.19,"tpScale":970.75,"cycle":1.44,"explore":0.15},"deck":{"charge":6.16,"ranged":2.52,"S":2.25,"combo":1.36,"blast":0,"B":0,"noise":2.97}},"defensiva":{"ai":{"actVal":78.22,"card":7.1,"hand":3.15,"adv":3.62,"lane":13.6,"deployRisk":13.6,"tpScale":495,"cycle":4.33,"explore":0.14},"deck":{"charge":9.1,"ranged":1.33,"S":4.97,"combo":0,"blast":0.17,"B":0,"noise":1.79}},"equilibrada":{"ai":{"actVal":73.1,"card":1.42,"hand":0.33,"adv":13.26,"lane":8.03,"deployRisk":0.65,"tpScale":825,"cycle":3.84,"explore":0.12},"deck":{"charge":7.92,"ranged":0,"S":5,"combo":4.44,"blast":1.5,"B":1.14,"noise":1.07}},"artillera":{"ai":{"actVal":59.5,"card":4.94,"hand":1,"adv":5.71,"lane":15.55,"deployRisk":1.65,"tpScale":660,"cycle":1.78,"explore":0.05},"deck":{"charge":7.7,"ranged":3.57,"S":3.02,"combo":0.02,"blast":1.11,"B":1.34,"noise":1}},"temeraria":{"ai":{"actVal":11.09,"card":1.1,"hand":0.44,"adv":8.7,"lane":30.66,"deployRisk":0.1,"tpScale":1100,"cycle":0.26,"explore":0.25},"deck":{"charge":8.24,"ranged":2.76,"S":1.81,"combo":1.88,"blast":4,"B":4,"noise":3.42}},"cautelosa":{"ai":{"actVal":87.8,"card":5.5,"hand":3.19,"adv":5.56,"lane":4.98,"deployRisk":12.91,"tpScale":613.67,"cycle":5.11,"explore":0.05},"deck":{"charge":4.43,"ranged":1.24,"S":1.17,"combo":0,"blast":1.89,"B":1.43,"noise":2.6}},"sacrificadora":{"ai":{"actVal":120,"card":1.1,"hand":0.43,"adv":13.26,"lane":12.6,"deployRisk":0.49,"tpScale":825,"cycle":4.61,"explore":0.11,"repoMin":2},"deck":{"charge":7.75,"ranged":2.05,"S":4.8,"combo":5,"blast":0.93,"B":1.17,"noise":1.19}}};
 // Dificultad: cuánto busca la IA, cuánto se equivoca a propósito y qué tan bueno es su mazo
 const DIFF_PRESETS={
   easy:{beam:2,depth:2,budgetMs:120,explore:0.55,exploreTol:400,noise:10},
